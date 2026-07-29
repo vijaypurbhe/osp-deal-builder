@@ -19,17 +19,23 @@ export default function CataloguePage() {
   const [classification, setClassification] = useState("all");
 
   const catalogue = useMemo(() => {
-    const byKey = new Map<string, { line: (typeof lines)[number]; scenarios: number }>();
+    const byKey = new Map<string, { line: (typeof lines)[number]; scenarios: Set<string> }>();
+    const seenPerScenario = new Map<string, number>();
     for (const line of lines ?? []) {
-      // sku_code is a quote/order reference and is shared across many SKUs,
-      // so identity is name + price + unit of measure.
-      const key = [line.sku_name, line.unit_list_price, line.unit_of_measure, line.sku_code ?? ""]
+      // sku_code is a quote/order reference shared by many SKUs, so identity is
+      // name + price + UoM; repeated identical lines in one scenario stay distinct.
+      const base = [line.sku_name, line.unit_list_price, line.unit_of_measure, line.sku_code ?? ""]
         .join("|")
         .toLowerCase();
+      const occKey = `${line.scenario_id}::${base}`;
+      const occ = seenPerScenario.get(occKey) ?? 0;
+      seenPerScenario.set(occKey, occ + 1);
+      const key = `${base}#${occ}`;
       const existing = byKey.get(key);
-      if (existing) existing.scenarios += 1;
-      else byKey.set(key, { line, scenarios: 1 });
+      if (existing) existing.scenarios.add(line.scenario_id);
+      else byKey.set(key, { line, scenarios: new Set([line.scenario_id]) });
     }
+
 
     return [...byKey.values()]
       .filter(({ line }) => (tower === "all" ? true : line.tower_key === tower))
