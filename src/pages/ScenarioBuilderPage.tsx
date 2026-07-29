@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { NumberCell } from "@/components/common/NumberCell";
 import { useDeal } from "@/context/DealContext";
 import { useDeleteRow, useScenarios, useSkuLines, useTowers, useUpsertRow } from "@/hooks/useDealData";
 import { computeLine, computeScenario } from "@/lib/pricing";
@@ -183,7 +184,7 @@ export default function ScenarioBuilderPage() {
               {(lines ?? []).map((line) => {
                 const m = computeLine(line, scenario);
                 return (
-                  <TableRow key={line.id}>
+                  <TableRow key={`${line.scenario_id}-${line.id}`}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div>
@@ -199,13 +200,13 @@ export default function ScenarioBuilderPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Input className="h-8" type="number" disabled={locked} defaultValue={line.quantity} onBlur={(e) => patch(line, { quantity: Number(e.target.value) })} />
+                      <NumberCell className="h-8" value={line.quantity} disabled={locked} onCommit={(v) => patch(line, { quantity: v })} />
                     </TableCell>
                     <TableCell>
-                      <Input className="h-8" type="number" step="0.01" disabled={locked} defaultValue={line.unit_list_price} onBlur={(e) => patch(line, { unit_list_price: Number(e.target.value) })} />
+                      <NumberCell className="h-8" step="0.01" value={line.unit_list_price} disabled={locked} onCommit={(v) => patch(line, { unit_list_price: v })} />
                     </TableCell>
                     <TableCell>
-                      <Input className="h-8" type="number" step="0.5" disabled={locked || !line.discountable} defaultValue={line.line_discount_pct} onBlur={(e) => patch(line, { line_discount_pct: Number(e.target.value) })} />
+                      <NumberCell className="h-8" step="0.5" value={line.line_discount_pct} disabled={locked || !line.discountable} onCommit={(v) => patch(line, { line_discount_pct: v })} />
                     </TableCell>
                     <TableCell>
                       <Select value={line.billing_frequency} disabled={locked} onValueChange={(v) => patch(line, { billing_frequency: v })}>
