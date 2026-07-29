@@ -60,7 +60,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <SectionCard title="Net ARR by tower" description="Where the recurring value sits in the current scenario" className="lg:col-span-2">
+        <SectionCard title="Net ARR by tower" description="Annualised recurring value in the current scenario" className="lg:col-span-2">
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={towerData} margin={{ left: 8, right: 8 }}>
