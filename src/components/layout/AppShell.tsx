@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
 import { useDeal } from "@/context/DealContext";
 import { useScenarios } from "@/hooks/useDealData";
