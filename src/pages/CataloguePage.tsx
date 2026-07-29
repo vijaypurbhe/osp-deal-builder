@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useDeal } from "@/context/DealContext";
 import { useAllSkuLines, useTowers } from "@/hooks/useDealData";
-import { computeLine } from "@/lib/pricing";
+import { computeLine, TERM_YEARS } from "@/lib/pricing";
 import { currency, number, percent } from "@/lib/format";
 import SectionCard from "@/components/common/SectionCard";
 import { Input } from "@/components/ui/input";
