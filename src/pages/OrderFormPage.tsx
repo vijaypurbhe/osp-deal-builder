@@ -165,10 +165,10 @@ export default function OrderFormPage() {
                   <TableRow>
                     <TableHead>SKU</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">List price</TableHead>
+                    <TableHead className="text-right">List price (3-yr)</TableHead>
                     <TableHead className="text-right">Eff. disc.</TableHead>
-                    <TableHead className="text-right">Net ARR</TableHead>
-                    <TableHead className="text-right">3-yr TCV</TableHead>
+                    <TableHead className="text-right">Net ARR (annual)</TableHead>
+                    <TableHead className="text-right">Net 3-yr TCV</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
