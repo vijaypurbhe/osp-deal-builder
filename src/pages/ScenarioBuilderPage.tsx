@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APPROVAL_STATUSES, BILLING_FREQUENCIES, CLASSIFICATIONS, UNITS_OF_MEASURE, type SkuLine } from "@/types/deal";
 import { AlertTriangle, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import LeverInput from "@/components/common/LeverInput";
 
 const emptyLine = (scenarioId: string): Partial<SkuLine> => ({
   scenario_id: scenarioId,
