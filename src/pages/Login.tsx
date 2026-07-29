@@ -1,43 +1,111 @@
-import { useNavigate } from "react-router-dom";
-import { usePhoenix } from "@/context/PhoenixContext";
+import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+import { useDeal } from "@/context/DealContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 export default function Login() {
-  const { personas, signIn } = usePhoenix();
+  const { session, loading } = useDeal();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    document.title = "Sign in · OSP Deal Builder";
+  }, []);
+
+  if (!loading && session) return <Navigate to="/" replace />;
+
+  const signIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    navigate("/", { replace: true });
+  };
+
+  const signUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin, data: { full_name: name } },
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Account created. You can sign in now.");
+  };
+
+  const google = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    if (result.error) return toast.error("Google sign-in failed");
+    if (result.redirected) return;
+    navigate("/", { replace: true });
+  };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-secondary px-6 py-12">
-      <div className="card-surface w-full max-w-xl p-8">
-        <p className="label-caps">World Bank Group demonstration</p>
-        <h1 className="mt-2 text-2xl font-semibold text-foreground">PHOENIX 360</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          AI-powered client, project and relationship platform. Choose a persona to enter the workspace.
-        </p>
-        <div className="mt-6 space-y-2">
-          {personas.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => {
-                signIn(p.id);
-                navigate("/home");
-              }}
-              className="card-hover flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3 text-left hover:bg-secondary"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-xs font-semibold text-primary-foreground">
-                {p.initials}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-medium text-foreground">{p.name}</span>
-                <span className="block text-xs text-muted-foreground">{p.title} · {p.unit}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-        <Button variant="ghost" className="mt-4 w-full" onClick={() => { signIn("investment_officer"); navigate("/home"); }}>
-          Continue as default persona
-        </Button>
-      </div>
+    <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2 text-center">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">S+N</div>
+          <CardTitle className="font-display text-xl">OSP Deal Builder</CardTitle>
+          <CardDescription>Smith+Nephew Salesforce estate — commercial modelling workspace</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Tabs defaultValue="signin">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="signup">Create account</TabsTrigger>
+            </TabsList>
+            <TabsContent value="signin">
+              <form className="space-y-3 pt-3" onSubmit={signIn}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">Work email</Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>Sign in</Button>
+              </form>
+            </TabsContent>
+            <TabsContent value="signup">
+              <form className="space-y-3 pt-3" onSubmit={signUp}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">Full name</Label>
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email2">Work email</Label>
+                  <Input id="email2" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password2">Password</Label>
+                  <Input id="password2" type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>Create account</Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+
+          <div className="relative py-1 text-center text-xs text-muted-foreground">
+            <span className="bg-card px-2">or</span>
+            <div className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border" />
+          </div>
+          <Button variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
+        </CardContent>
+      </Card>
     </main>
   );
 }

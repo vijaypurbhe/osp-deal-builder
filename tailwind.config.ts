@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "Aptos", "system-ui", "sans-serif"],
+        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
+        display: ["Manrope", "IBM Plex Sans", "system-ui", "sans-serif"],
         mono: ["IBM Plex Mono", "monospace"],
       },
       colors: {
@@ -60,6 +61,10 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        tint: {
+          DEFAULT: "hsl(var(--tint-orange))",
+          foreground: "hsl(var(--tint-orange-foreground))",
         },
         surface: {
           DEFAULT: "hsl(var(--surface))",
