@@ -99,6 +99,7 @@ export default function CataloguePage() {
                     <TableCell><Badge variant="outline">{line.classification}</Badge></TableCell>
                     <TableCell className="text-sm">{line.unit_of_measure}</TableCell>
                     <TableCell className="text-right tabular-nums">{currency(line.unit_list_price, "USD", 2)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{currency(line.unit_list_price / TERM_YEARS, "USD", 2)}</TableCell>
                     <TableCell className="text-right tabular-nums">{percent(line.max_discount_pct, 0)}</TableCell>
                     <TableCell className="text-right tabular-nums">{percent(m.effectiveDiscountPct)}</TableCell>
                     <TableCell className="space-x-1">
