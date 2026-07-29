@@ -104,7 +104,7 @@ export default function CataloguePage() {
                   <TableRow key={line.id}>
                     <TableCell>
                       <p className="font-medium">{line.sku_name}</p>
-                      <p className="text-xs text-muted-foreground">{line.sku_code ?? "—"} · used in {number(scenarios)} scenario(s)</p>
+                      <p className="text-xs text-muted-foreground">{line.sku_code ?? "—"} · used in {number(scenarios.size)} scenario(s)</p>
                     </TableCell>
                     <TableCell className="text-sm">{line.cloud ?? "—"}<span className="block text-xs text-muted-foreground">{line.product_family ?? ""}</span></TableCell>
                     <TableCell><Badge variant="outline">{line.classification}</Badge></TableCell>
