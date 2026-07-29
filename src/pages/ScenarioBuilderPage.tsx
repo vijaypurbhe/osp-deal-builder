@@ -165,11 +165,12 @@ export default function ScenarioBuilderPage() {
               <TableRow>
                 <TableHead className="min-w-[220px]">SKU</TableHead>
                 <TableHead className="w-24">Qty</TableHead>
-                <TableHead className="w-28">List price</TableHead>
+                <TableHead className="w-28">List price (3-yr)</TableHead>
                 <TableHead className="w-24">Line %</TableHead>
                 <TableHead className="w-36">Billing</TableHead>
-                <TableHead className="text-right">Net ARR</TableHead>
-                <TableHead className="text-right">TCV</TableHead>
+                <TableHead className="text-right">Net ARR (annual)</TableHead>
+                <TableHead className="text-right">Net 3-yr TCV</TableHead>
+
                 <TableHead className="w-44">Status</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
