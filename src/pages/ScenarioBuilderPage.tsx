@@ -62,10 +62,11 @@ export default function ScenarioBuilderPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="List ARR" value={currency(totals.listArr)} />
-        <KpiCard label="Net ARR" value={currency(totals.netArr)} tone="positive" />
+        <KpiCard label="List ARR (annual)" value={currency(totals.listArr)} hint={`3-yr list ${currency(totals.listTermValue)}`} />
+        <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`3-yr net ${currency(totals.netTermValue)}`} tone="positive" />
         <KpiCard label="Effective discount" value={percent(totals.effectiveDiscountPct)} tone={totals.effectiveDiscountPct > scenario.approval_threshold_pct ? "critical" : "default"} />
         <KpiCard label="3-year TCV" value={currency(totals.tcv)} />
+
       </div>
 
       <SectionCard title="Scenario settings" description={scenario.description ?? "Commercial levers applied to every eligible line"}>
