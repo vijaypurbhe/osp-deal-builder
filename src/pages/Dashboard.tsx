@@ -65,7 +65,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={towerData} margin={{ left: 8, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-12} textAnchor="end" height={60} stroke="hsl(var(--muted-foreground))" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} textAnchor="middle" height={40} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tickFormatter={(v) => compactCurrency(Number(v))} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip formatter={(v) => currency(Number(v))} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
