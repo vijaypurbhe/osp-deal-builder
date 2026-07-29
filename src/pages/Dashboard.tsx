@@ -114,7 +114,7 @@ export default function Dashboard() {
                 <TableHead>Tower</TableHead>
                 <TableHead>Decision status</TableHead>
                 <TableHead>Confidence</TableHead>
-                <TableHead className="text-right">Net ARR</TableHead>
+                <TableHead className="text-right">Net ARR (annual)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
