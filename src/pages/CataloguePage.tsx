@@ -82,10 +82,10 @@ export default function CataloguePage() {
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={8} className="text-muted-foreground">Loading catalogue…</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-muted-foreground">Loading catalogue…</TableCell></TableRow>
               )}
               {!isLoading && !catalogue.length && (
-                <TableRow><TableCell colSpan={8} className="text-muted-foreground">No SKUs match the current filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-muted-foreground">No SKUs match the current filters.</TableCell></TableRow>
               )}
               {catalogue.map(({ line, scenarios }) => {
                 const m = computeLine(line);
