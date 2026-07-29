@@ -97,7 +97,7 @@ export default function ScenarioBuilderPage() {
         </div>
         <div className="mt-4 space-y-1.5">
           <Label className="text-xs text-muted-foreground">Scenario notes</Label>
-          <Textarea defaultValue={scenario.notes ?? ""} disabled={locked} onBlur={(e) => upsertScenario.mutate({ ...scenario, notes: e.target.value })} />
+          <Textarea key={scenario.id} defaultValue={scenario.notes ?? ""} disabled={locked} onBlur={(e) => upsertScenario.mutate({ ...scenario, notes: e.target.value })} />
         </div>
       </SectionCard>
 
