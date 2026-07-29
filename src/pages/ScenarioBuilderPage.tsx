@@ -126,7 +126,7 @@ export default function ScenarioBuilderPage() {
                   <Input type="number" value={draft?.quantity ?? 1} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Unit list price</Label>
+                  <Label>Unit list price (3-year term)</Label>
                   <Input type="number" step="0.01" value={draft?.unit_list_price ?? 0} onChange={(e) => setDraft({ ...draft, unit_list_price: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
