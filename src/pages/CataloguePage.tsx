@@ -21,11 +21,16 @@ export default function CataloguePage() {
   const catalogue = useMemo(() => {
     const byKey = new Map<string, { line: (typeof lines)[number]; scenarios: number }>();
     for (const line of lines ?? []) {
-      const key = `${line.sku_code ?? line.sku_name}`.toLowerCase();
+      // sku_code is a quote/order reference and is shared across many SKUs,
+      // so identity is name + price + unit of measure.
+      const key = [line.sku_name, line.unit_list_price, line.unit_of_measure, line.sku_code ?? ""]
+        .join("|")
+        .toLowerCase();
       const existing = byKey.get(key);
       if (existing) existing.scenarios += 1;
       else byKey.set(key, { line, scenarios: 1 });
     }
+
     return [...byKey.values()]
       .filter(({ line }) => (tower === "all" ? true : line.tower_key === tower))
       .filter(({ line }) => (classification === "all" ? true : line.classification === classification))
