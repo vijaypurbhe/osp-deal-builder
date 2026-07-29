@@ -72,21 +72,24 @@ export default function ScenarioBuilderPage() {
       <SectionCard title="Scenario settings" description={scenario.description ?? "Commercial levers applied to every eligible line"}>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {([
-            ["scenario_discount_pct", "Scenario discount %"],
-            ["bulk_discount_pct", "Bulk discount %"],
-            ["strategic_override_pct", "Strategic override %"],
-            ["approval_threshold_pct", "Approval threshold %"],
-          ] as const).map(([field, label]) => (
-            <div key={field} className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">{label}</Label>
-              <Input
-                type="number"
-                step="0.5"
-                disabled={locked}
-                defaultValue={scenario[field]}
-                onBlur={(e) => upsertScenario.mutate({ ...scenario, [field]: Number(e.target.value) })}
-              />
-            </div>
+            ["scenario_discount_pct", "Scenario discount %", "Applied to every line after line and category discounts"],
+            ["bulk_discount_pct", "Bulk discount %", "Applied only to bulk-eligible lines"],
+            ["strategic_override_pct", "Strategic override %", "Final executive discount on top of the waterfall"],
+            ["approval_threshold_pct", "Approval threshold %", "Flags lines above this effective discount"],
+          ] as const).map(([field, label, hint]) => (
+            <LeverInput
+              key={field}
+              label={label}
+              hint={hint}
+              value={Number(scenario[field])}
+              disabled={locked}
+              onCommit={(v) =>
+                upsertScenario.mutate(
+                  { ...scenario, [field]: v },
+                  { onSuccess: () => toast.success(`${label.replace(" %", "")} set to ${v}% — totals updated`) },
+                )
+              }
+            />
           ))}
         </div>
         <div className="mt-4 space-y-1.5">
