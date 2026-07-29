@@ -97,6 +97,8 @@ export function computeLine(line: SkuLine, scenario?: Pick<Scenario, "scenario_d
 
 
 export interface ScenarioTotals {
+  listTermValue: number;
+  netTermValue: number;
   listArr: number;
   netArr: number;
   y1: number;
@@ -121,11 +123,13 @@ export interface ScenarioTotals {
 
 export function computeScenario(lines: SkuLine[], scenario?: Scenario): ScenarioTotals {
   const t: ScenarioTotals = {
+    listTermValue: 0, netTermValue: 0,
     listArr: 0, netArr: 0, y1: 0, y2: 0, y3: 0, tcv: 0, effectiveDiscountPct: 0,
     lineDiscountValue: 0, categoryDiscountValue: 0, bulkDiscountValue: 0, overrideDiscountValue: 0,
     currentAcv: 0, revisedAcv: 0, incrementalAcv: 0, netNewSkus: 0, rationalizedSkus: 0,
     needsSalesforce: 0, needsSn: 0, openAssumptions: 0, warnings: 0,
   };
+
   for (const line of lines) {
     const m = computeLine(line, scenario);
     t.listArr += m.listArr;
