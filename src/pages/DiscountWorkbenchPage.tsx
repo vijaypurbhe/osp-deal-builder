@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import LeverSlider from "@/components/common/LeverSlider";
 
 export default function DiscountWorkbenchPage() {
   const { activeScenarioId, canEdit } = useDeal();
