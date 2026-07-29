@@ -132,6 +132,8 @@ export function computeScenario(lines: SkuLine[], scenario?: Scenario): Scenario
 
   for (const line of lines) {
     const m = computeLine(line, scenario);
+    t.listTermValue += m.listTermValue;
+    t.netTermValue += m.netTermValue;
     t.listArr += m.listArr;
     t.netArr += m.netArr;
     t.y1 += m.y1;
