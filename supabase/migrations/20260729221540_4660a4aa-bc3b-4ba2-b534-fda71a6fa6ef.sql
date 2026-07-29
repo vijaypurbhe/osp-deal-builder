@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.grant_default_deal_role() FROM PUBLIC, anon, authenticated;
