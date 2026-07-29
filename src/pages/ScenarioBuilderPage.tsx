@@ -170,9 +170,9 @@ export default function ScenarioBuilderPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="min-w-[220px]">SKU</TableHead>
-                <TableHead className="w-24">Qty</TableHead>
+                <TableHead className="w-28 min-w-[96px]">Qty</TableHead>
                 <TableHead className="w-40 min-w-[150px]">List price (3-yr)</TableHead>
-                <TableHead className="w-24">Line %</TableHead>
+                <TableHead className="w-24 min-w-[88px]">Line %</TableHead>
                 <TableHead className="w-36">Billing</TableHead>
                 <TableHead className="text-right min-w-[130px]">Net ARR (annual)</TableHead>
                 <TableHead className="text-right min-w-[130px]">Net 3-yr TCV</TableHead>
@@ -200,13 +200,13 @@ export default function ScenarioBuilderPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <NumberCell className="h-8" value={line.quantity} disabled={locked} onCommit={(v) => patch(line, { quantity: v })} />
+                      <NumberCell className="h-8 min-w-[80px]" value={line.quantity} disabled={locked} onCommit={(v) => patch(line, { quantity: v })} />
                     </TableCell>
                     <TableCell>
                       <NumberCell className="h-8" step="0.01" value={line.unit_list_price} disabled={locked} onCommit={(v) => patch(line, { unit_list_price: v })} />
                     </TableCell>
                     <TableCell>
-                      <NumberCell className="h-8" step="0.5" value={line.line_discount_pct} disabled={locked || !line.discountable} onCommit={(v) => patch(line, { line_discount_pct: v })} />
+                      <NumberCell className="h-8 min-w-[72px]" step="0.5" value={line.line_discount_pct} disabled={locked || !line.discountable} onCommit={(v) => patch(line, { line_discount_pct: v })} />
                     </TableCell>
                     <TableCell>
                       <Select value={line.billing_frequency} disabled={locked} onValueChange={(v) => patch(line, { billing_frequency: v })}>
