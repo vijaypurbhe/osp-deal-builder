@@ -132,7 +132,7 @@ export default function ScenarioBuilderPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Unit list price (3-year term)</Label>
-                  <Input type="number" step="0.01" value={draft?.unit_list_price ?? 0} onChange={(e) => setDraft({ ...draft, unit_list_price: Number(e.target.value) })} />
+                  <Input type="number" step="0.01" placeholder="0.00" value={draft?.unit_list_price || ""} onChange={(e) => setDraft({ ...draft, unit_list_price: e.target.value === "" ? 0 : Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Unit of measure</Label>
