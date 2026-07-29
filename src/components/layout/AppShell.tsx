@@ -58,6 +58,13 @@ export default function AppShell() {
   const [open, setOpen] = useState(false);
   const current = ALL_NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
 
+  // Default to the recommended (or first) scenario so pages are never blank.
+  useEffect(() => {
+    if (!scenarios?.length) return;
+    if (activeScenarioId && scenarios.some((s) => s.id === activeScenarioId)) return;
+    setActiveScenarioId((scenarios.find((s) => s.is_recommended) ?? scenarios[0]).id);
+  }, [scenarios, activeScenarioId, setActiveScenarioId]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
