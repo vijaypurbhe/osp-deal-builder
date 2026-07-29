@@ -1,109 +1,146 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Bell, LogOut, Moon, Search, Sparkles, Sun } from "lucide-react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
+import { useDeal } from "@/context/DealContext";
+import { useScenarios } from "@/hooks/useDealData";
 import { Button } from "@/components/ui/button";
-import { usePhoenix } from "@/context/PhoenixContext";
-import AssistantPanel from "./AssistantPanel";
-import PersonaSwitcher from "./PersonaSwitcher";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { navForPersona, type NavItem } from "@/lib/navigation";
+import { LogOut, Menu, UserRound } from "lucide-react";
+
+const ROLE_LABEL: Record<string, string> = {
+  deal_architect: "Deal architect",
+  salesforce_ae: "Salesforce AE",
+  tm_osp_lead: "Tech Mahindra OSP lead",
+  sn_reviewer: "Smith+Nephew reviewer",
+  finance_reviewer: "Finance reviewer",
+};
+
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <nav className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-5">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group.label}</p>
+          <ul className="space-y-0.5">
+            {group.items.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.to === "/"}
+                  onClick={onNavigate}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground",
+                    )
+                  }
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
 
 export default function AppShell() {
-  const { persona, personas, setPersona, signOut, unreadCount, setAssistantOpen, assistantOpen, theme, toggleTheme } = usePhoenix();
-  const navigate = useNavigate();
-  const { core, focus } = navForPersona(persona);
-
-  const renderItem = (item: NavItem) => (
-    <li key={item.key}>
-      <NavLink
-        to={item.to}
-        end
-        className={({ isActive }) =>
-          cn(
-            "group relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-            isActive
-              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-card"
-              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-          )
-        }
-      >
-        {({ isActive }) => (
-          <>
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-sidebar-primary transition-opacity",
-                isActive ? "opacity-100" : "opacity-0",
-              )}
-            />
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </>
-        )}
-      </NavLink>
-    </li>
-  );
+  const { profile, roles, signOut, activeScenarioId, setActiveScenarioId } = useDeal();
+  const { data: scenarios } = useScenarios();
+  const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
+  const current = ALL_NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <nav className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-        <div className="border-b border-sidebar-border/70 px-5 py-5">
-          <p className="text-sm font-semibold tracking-[0.14em] text-sidebar-primary">PHOENIX 360</p>
-          <p className="mt-1 text-xs text-sidebar-foreground/70">Client, Project & Relationship Platform</p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
+        <div className="flex h-16 items-center gap-3 px-4">
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <SidebarContent onNavigate={() => setOpen(false)} />
+            </SheetContent>
+          </Sheet>
 
-        <div className="flex-1 overflow-y-auto px-3 py-3">
-          <ul className="space-y-1">{core.map(renderItem)}</ul>
-          {focus.length > 0 && (
-            <div className="mt-5">
-              <p className="px-3 pb-2 text-[0.6875rem] uppercase tracking-[0.09em] text-sidebar-foreground/55">
-                {persona.title} focus
-              </p>
-              <ul className="space-y-1">{focus.map(renderItem)}</ul>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">S+N</div>
+            <div className="leading-tight">
+              <p className="font-display text-sm font-semibold">OSP Deal Builder</p>
+              <p className="text-xs text-muted-foreground">Smith+Nephew · Salesforce estate</p>
+            </div>
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <Select value={activeScenarioId ?? undefined} onValueChange={setActiveScenarioId}>
+              <SelectTrigger className="hidden w-[230px] md:flex" aria-label="Active scenario">
+                <SelectValue placeholder="Select scenario" />
+              </SelectTrigger>
+              <SelectContent>
+                {(scenarios ?? []).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Account menu">
+                  <UserRound className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="space-y-1">
+                  <p className="text-sm font-medium">{profile?.display_name ?? profile?.email ?? "Signed in"}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {roles.length ? (
+                      roles.map((r) => (
+                        <Badge key={r} variant="secondary" className="text-[10px] font-normal">
+                          {ROLE_LABEL[r] ?? r}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] font-normal">
+                        Read only
+                      </Badge>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:block">
+          <SidebarContent />
+        </aside>
+        <main className="min-w-0 flex-1 px-4 py-6 lg:px-8">
+          {current && (
+            <div className="mb-6">
+              <h1 className="font-display text-2xl font-semibold tracking-tight">{current.label}</h1>
+              <p className="text-sm text-muted-foreground">{current.description}</p>
             </div>
           )}
-        </div>
-
-        <div className="border-t border-sidebar-border px-4 py-4">
-          <p className="text-[0.6875rem] uppercase tracking-[0.09em] text-sidebar-foreground/60">Persona</p>
-          <PersonaSwitcher variant="sidebar" className="mt-2" />
-        </div>
-      </nav>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/85 px-6 py-3 backdrop-blur-md">
-          <Button variant="outline" size="sm" onClick={() => navigate("/search")}>
-            <Search className="h-4 w-4" />
-            Search
-          </Button>
-          <PersonaSwitcher />
-
-          <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
-              <Bell className="h-4 w-4" />
-              {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
-              )}
-            </Button>
-            <Button variant={assistantOpen ? "default" : "outline"} size="sm" onClick={() => setAssistantOpen(!assistantOpen)}>
-              <Sparkles className="h-4 w-4" />
-              Phoenix AI
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Sign out" onClick={signOut}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </header>
-
-        <div className="flex min-h-0 flex-1">
-          <main className="app-canvas min-w-0 flex-1 overflow-y-auto px-8 py-7">
-            <div className="mx-auto w-full max-w-[1600px] animate-fade-in">
-              <Outlet />
-            </div>
-          </main>
-          <AssistantPanel />
-        </div>
+          <Outlet />
+        </main>
       </div>
     </div>
   );

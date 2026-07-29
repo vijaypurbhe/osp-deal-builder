@@ -1,33 +1,37 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { PhoenixProvider } from "@/context/PhoenixContext";
-import AppShell from "@/components/layout/AppShell";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { DealProvider } from "@/context/DealContext";
 import RequireAuth from "@/components/layout/RequireAuth";
-import Login from "@/pages/Login";
-import Home from "@/pages/Home";
-import ClientsPage from "@/pages/ClientsPage";
-import ClientDetailPage from "@/pages/ClientDetailPage";
-import ProjectsPage from "@/pages/ProjectsPage";
-import ProjectDetailPage from "@/pages/ProjectDetailPage";
-import AnalyticsPage from "@/pages/AnalyticsPage";
-import DocumentReviewPage from "@/pages/DocumentReviewPage";
-import SearchPage from "@/pages/SearchPage";
-import NotFound from "@/pages/NotFound";
+import AppShell from "@/components/layout/AppShell";
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
-});
+import Login from "@/pages/Login";
+import NotFound from "@/pages/NotFound";
+import Dashboard from "@/pages/Dashboard";
+import CataloguePage from "@/pages/CataloguePage";
+import ScenarioBuilderPage from "@/pages/ScenarioBuilderPage";
+import ScenarioComparePage from "@/pages/ScenarioComparePage";
+import DiscountWorkbenchPage from "@/pages/DiscountWorkbenchPage";
+import OrderFormPage from "@/pages/OrderFormPage";
+import GrowthModelPage from "@/pages/models/GrowthModelPage";
+import Data360Page from "@/pages/models/Data360Page";
+import AgentforcePage from "@/pages/models/AgentforcePage";
+import MuleSoftPage from "@/pages/models/MuleSoftPage";
+import ServiceMaxPage from "@/pages/models/ServiceMaxPage";
+import ImportPage from "@/pages/ImportPage";
+import DiscussionPage from "@/pages/DiscussionPage";
+import RiskPage from "@/pages/RiskPage";
+import SettingsPage from "@/pages/SettingsPage";
+
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <PhoenixProvider>
-      <TooltipProvider delayDuration={200}>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <TooltipProvider>
+      <Toaster />
+      <BrowserRouter>
+        <DealProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
@@ -37,21 +41,27 @@ const App = () => (
                 </RequireAuth>
               }
             >
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/clients/:clientId" element={<ClientDetailPage />} />
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/documents/:documentId" element={<DocumentReviewPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/catalogue" element={<CataloguePage />} />
+              <Route path="/scenarios" element={<ScenarioBuilderPage />} />
+              <Route path="/compare" element={<ScenarioComparePage />} />
+              <Route path="/discounts" element={<DiscountWorkbenchPage />} />
+              <Route path="/order-forms" element={<OrderFormPage />} />
+              <Route path="/models/growth" element={<GrowthModelPage />} />
+              <Route path="/models/data360" element={<Data360Page />} />
+              <Route path="/models/agentforce" element={<AgentforcePage />} />
+              <Route path="/models/mulesoft" element={<MuleSoftPage />} />
+              <Route path="/models/servicemax" element={<ServiceMaxPage />} />
+              <Route path="/import" element={<ImportPage />} />
+              <Route path="/discussion" element={<DiscussionPage />} />
+              <Route path="/risks" element={<RiskPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </PhoenixProvider>
+        </DealProvider>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

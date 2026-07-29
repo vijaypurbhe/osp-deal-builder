@@ -1,9 +1,15 @@
-import { Navigate } from "react-router-dom";
-import { usePhoenix } from "@/context/PhoenixContext";
-import type { ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useDeal } from "@/context/DealContext";
 
-export default function RequireAuth({ children }: { children: ReactNode }) {
-  const { signedIn } = usePhoenix();
-  if (!signedIn) return <Navigate to="/login" replace />;
+export default function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useDeal();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading deal workspace…</div>
+    );
+  }
+  if (!session) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   return <>{children}</>;
 }

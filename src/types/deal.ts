@@ -1,0 +1,416 @@
+export type Classification =
+  | "Current baseline"
+  | "Growth"
+  | "Replacement"
+  | "Incremental"
+  | "Optional"
+  | "Further discussion"
+  | "Retire / rationalize";
+
+export const CLASSIFICATIONS: Classification[] = [
+  "Current baseline",
+  "Growth",
+  "Replacement",
+  "Incremental",
+  "Optional",
+  "Further discussion",
+  "Retire / rationalize",
+];
+
+export const UNITS_OF_MEASURE = [
+  "User",
+  "Org",
+  "Login",
+  "Credit",
+  "Conversation",
+  "GB",
+  "vCore",
+  "Flow",
+  "Message",
+  "Connector",
+  "Sandbox",
+  "Add-on",
+  "Other",
+] as const;
+
+export const BILLING_FREQUENCIES = ["Monthly", "Annual", "One-time", "Usage-based"] as const;
+
+export const PRORATION_METHODS = ["None", "Daily", "Monthly", "Co-term"] as const;
+
+export const APPROVAL_STATUSES = [
+  "Draft",
+  "Under review",
+  "Salesforce validation needed",
+  "S+N validation needed",
+  "Approved for order form",
+] as const;
+
+export const DECISION_STATUSES = APPROVAL_STATUSES;
+
+export const CONFIDENCE_LEVELS = ["Low", "Medium", "High"] as const;
+
+export const ORDER_FORM_TYPES = [
+  "Initial OSP Order Form",
+  "Incremental Year 1 Order Form",
+  "Year 2 Expansion Order Form",
+  "Year 3 Expansion / Renewal Order Form",
+  "Agentforce Flex Credit Order Form",
+  "Data 360 / Marketing Expansion Order Form",
+  "MuleSoft Capacity Expansion Order Form",
+  "ServiceMax / Service Cloud Order Form",
+  "Further Discussion / Optional SKUs Order Form",
+] as const;
+
+export const DEAL_ROLES = [
+  { key: "deal_architect", label: "Deal Architect / Admin", canEdit: true },
+  { key: "salesforce_ae", label: "Salesforce AE / Commercial", canEdit: true },
+  { key: "tm_osp_lead", label: "Tech Mahindra OSP Lead", canEdit: true },
+  { key: "sn_reviewer", label: "Smith+Nephew Reviewer", canEdit: false },
+  { key: "finance_reviewer", label: "Finance / Deal Desk Reviewer", canEdit: false },
+] as const;
+
+export type DealRole = (typeof DEAL_ROLES)[number]["key"];
+
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  owner_name: string | null;
+  owner_id: string | null;
+  is_locked: boolean;
+  is_baseline: boolean;
+  is_recommended: boolean;
+  notes: string | null;
+  currency: string;
+  contract_start: string | null;
+  contract_end: string | null;
+  scenario_discount_pct: number;
+  bulk_discount_pct: number;
+  bulk_discount_mode: string;
+  strategic_override_pct: number;
+  approval_threshold_pct: number;
+  sort_order: number;
+}
+
+export interface SkuLine {
+  id: string;
+  scenario_id: string;
+  tower_key: string | null;
+  sku_code: string | null;
+  sku_name: string;
+  description: string | null;
+  product_family: string | null;
+  product_category: string | null;
+  cloud: string | null;
+  classification: string;
+  bom_type: string;
+  quantity: number;
+  unit_of_measure: string;
+  unit_list_price: number;
+  billing_frequency: string;
+  line_discount_pct: number;
+  category_discount_pct: number;
+  bulk_eligible: boolean;
+  discountable: boolean;
+  max_discount_pct: number;
+  approval_threshold_pct: number;
+  discount_reason: string | null;
+  year1_qty: number | null;
+  year2_qty: number | null;
+  year3_qty: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  coterm_date: string | null;
+  proration_method: string;
+  approval_status: string;
+  assumption_owner: string | null;
+  needs_salesforce_confirmation: boolean;
+  needs_sn_confirmation: boolean;
+  notes: string | null;
+  source_tab: string | null;
+  source_file: string | null;
+}
+
+export interface Tower {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  sort_order: number;
+  decision_status: string;
+  confidence: string;
+}
+
+export interface DiscussionItem {
+  id: string;
+  area: string;
+  title: string;
+  description: string | null;
+  status: string;
+  owner: string | null;
+  commercial_impact: string | null;
+  technical_impact: string | null;
+  decision_needed: string | null;
+  target_decision_date: string | null;
+  order_form_inclusion: string;
+}
+
+export interface RiskEntry {
+  id: string;
+  ref_code: string | null;
+  category: string;
+  description: string;
+  owner: string | null;
+  impact: string;
+  probability: string;
+  status: string;
+  decision_needed_by: string | null;
+  commercial_impact: string | null;
+  technical_impact: string | null;
+  legal_impact: string | null;
+  notes: string | null;
+}
+
+export interface OrderForm {
+  id: string;
+  scenario_id: string;
+  form_type: string;
+  form_number: string | null;
+  customer_name: string;
+  partner_name: string;
+  contract_start: string | null;
+  contract_end: string | null;
+  billing_frequency: string;
+  currency: string;
+  notes: string | null;
+  assumptions: string | null;
+  open_items: string | null;
+  approval_status: string;
+}
+
+export interface BulkTier {
+  id: string;
+  scenario_id: string;
+  tier_name: string;
+  tcv_threshold: number;
+  discount_pct: number;
+  sort_order: number;
+}
+
+/* ---------- Model configs ---------- */
+
+export interface GrowthModel {
+  baseline_users: number;
+  us_ortho_growth: number;
+  international_growth: number;
+  servicemax_increment: number;
+  south_africa_health: number;
+  other_growth: number;
+  retired_users: number;
+  growth_case: "conservative" | "expected" | "upside";
+  conservative_factor: number;
+  expected_factor: number;
+  upside_factor: number;
+}
+
+export const DEFAULT_GROWTH: GrowthModel = {
+  baseline_users: 4073,
+  us_ortho_growth: 250,
+  international_growth: 400,
+  servicemax_increment: 300,
+  south_africa_health: 60,
+  other_growth: 100,
+  retired_users: 150,
+  growth_case: "expected",
+  conservative_factor: 0.6,
+  expected_factor: 1,
+  upside_factor: 1.35,
+};
+
+export interface SandboxModel {
+  sandbox_type: "Developer" | "Developer Pro" | "Partial Copy" | "Full Copy";
+  quantity: number;
+  included_in_contract: "yes" | "no" | "unknown";
+  required_for: string[];
+  refresh_frequency: string;
+  data_masking_required: boolean;
+  compliance_notes: string;
+}
+
+export const DEFAULT_SANDBOX: SandboxModel = {
+  sandbox_type: "Partial Copy",
+  quantity: 1,
+  included_in_contract: "unknown",
+  required_for: ["Development", "SIT", "UAT", "ServiceMax project"],
+  refresh_frequency: "Every 5 days",
+  data_masking_required: true,
+  compliance_notes: "Partial Copy selected — Data Mask / Shield should be evaluated.",
+};
+
+export interface Data360Model {
+  unified_profiles: number;
+  data_sources: number;
+  activations_per_month: number;
+  refresh_frequency: string;
+  monthly_credits: number;
+  buffer_pct: number;
+  adoption_y1: number;
+  adoption_y2: number;
+  adoption_y3: number;
+  credit_unit_price: number;
+  pricing_option: "Profile-based" | "Flex Credits" | "Hybrid";
+  marketing_business_units: number;
+  marketing_bu_price: number;
+  mci_expansion_cost: number;
+  governance_status: string;
+}
+
+export const DEFAULT_DATA360: Data360Model = {
+  unified_profiles: 12000000,
+  data_sources: 18,
+  activations_per_month: 120,
+  refresh_frequency: "Daily",
+  monthly_credits: 850000,
+  buffer_pct: 15,
+  adoption_y1: 40,
+  adoption_y2: 75,
+  adoption_y3: 100,
+  credit_unit_price: 0.0009,
+  pricing_option: "Flex Credits",
+  marketing_business_units: 3,
+  marketing_bu_price: 45000,
+  mci_expansion_cost: 120000,
+  governance_status: "Defining",
+};
+
+export interface AgentforceModel {
+  eligible_population: number;
+  excluded_users: number;
+  addon_unit_price: number;
+  addon_discount_pct: number;
+  adoption_y1: number;
+  adoption_y2: number;
+  adoption_y3: number;
+  use_cases: string[];
+  flex_use_case: string;
+  cases_per_month: number;
+  actions_per_transaction: number;
+  credits_per_action: number;
+  credit_unit_price: number;
+  buffer_pct: number;
+  overrun_threshold: number;
+  ramp_start: string;
+  quote_needed: boolean;
+  human_in_loop: boolean;
+  data_ready: boolean;
+}
+
+export const DEFAULT_AGENTFORCE: AgentforceModel = {
+  eligible_population: 4956,
+  excluded_users: 400,
+  addon_unit_price: 600,
+  addon_discount_pct: 20,
+  adoption_y1: 50,
+  adoption_y2: 85,
+  adoption_y3: 100,
+  use_cases: ["Account planning", "Opportunity coaching", "Sales activity summaries", "Pipeline hygiene"],
+  flex_use_case: "Customer Care order automation",
+  cases_per_month: 45000,
+  actions_per_transaction: 6,
+  credits_per_action: 2,
+  credit_unit_price: 0.0018,
+  buffer_pct: 20,
+  overrun_threshold: 110,
+  ramp_start: "2026-04-01",
+  quote_needed: true,
+  human_in_loop: true,
+  data_ready: false,
+};
+
+export interface MuleSoftModel {
+  current_prod_vcores: number;
+  current_preprod_vcores: number;
+  api_manager_qty: number;
+  premium_connectors: number;
+  sap_connector: number;
+  flows: number;
+  messages_millions: number;
+  current_api_count: number;
+  expected_new_apis: number;
+  transaction_growth_pct: number;
+  servicemax_growth: number;
+  data_ai_growth: number;
+  order_automation_growth: number;
+  monitoring_required: boolean;
+  y1_increment: number;
+  y2_increment: number;
+  y3_increment: number;
+  vcore_price: number;
+}
+
+export const DEFAULT_MULESOFT: MuleSoftModel = {
+  current_prod_vcores: 16,
+  current_preprod_vcores: 8,
+  api_manager_qty: 1,
+  premium_connectors: 4,
+  sap_connector: 1,
+  flows: 240,
+  messages_millions: 180,
+  current_api_count: 210,
+  expected_new_apis: 90,
+  transaction_growth_pct: 35,
+  servicemax_growth: 4,
+  data_ai_growth: 6,
+  order_automation_growth: 3,
+  monitoring_required: true,
+  y1_increment: 6,
+  y2_increment: 5,
+  y3_increment: 4,
+  vcore_price: 42000,
+};
+
+export interface ServiceMaxModel {
+  current_service_baseline: number;
+  project_population: number;
+  full_service_users: number;
+  dispatcher_users: number;
+  internal_support_users: number;
+  partner_users: number;
+  integration_users: number;
+  required_sandboxes: number;
+  required_addons: string;
+  go_live_date: string;
+  ramp_year: 1 | 2 | 3;
+  discount_pct: number;
+  unit_price: number;
+  notes: string;
+}
+
+export const DEFAULT_SERVICEMAX: ServiceMaxModel = {
+  current_service_baseline: 900,
+  project_population: 620,
+  full_service_users: 420,
+  dispatcher_users: 60,
+  internal_support_users: 90,
+  partner_users: 40,
+  integration_users: 5,
+  required_sandboxes: 1,
+  required_addons: "Field Service, Service Cloud Voice (under review)",
+  go_live_date: "2026-07-01",
+  ramp_year: 1,
+  discount_pct: 25,
+  unit_price: 1800,
+  notes: "Incremental Service Cloud licensing to support the ServiceMax programme.",
+};
+
+export const MODEL_DEFAULTS = {
+  growth: DEFAULT_GROWTH,
+  sandbox: DEFAULT_SANDBOX,
+  data360: DEFAULT_DATA360,
+  agentforce: DEFAULT_AGENTFORCE,
+  mulesoft: DEFAULT_MULESOFT,
+  servicemax: DEFAULT_SERVICEMAX,
+} as const;
+
+export type ModelKey = keyof typeof MODEL_DEFAULTS;
