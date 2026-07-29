@@ -55,7 +55,9 @@ export function computeLine(line: SkuLine, scenario?: Pick<Scenario, "scenario_d
   const warnings: string[] = [];
   const multiplier = billingMultiplier(line.billing_frequency);
   const gross = (Number(line.quantity) || 0) * (Number(line.unit_list_price) || 0);
-  const listArr = gross * multiplier;
+  // SKU list prices are stated for the full contracted term, so annualise them.
+  const listTermValue = gross * multiplier;
+  const listArr = listTermValue / TERM_YEARS;
   const oneTimeValue = line.billing_frequency === "One-time" ? gross : 0;
 
   const lineDisc = line.discountable ? pct(line.line_discount_pct) : 0;
@@ -72,6 +74,7 @@ export function computeLine(line: SkuLine, scenario?: Pick<Scenario, "scenario_d
   const afterBulk = afterCategory * (1 - bulkPct);
   const afterScenario = afterBulk * (1 - pct(scenario?.scenario_discount_pct ?? 0));
   const netArr = afterScenario * (1 - pct(scenario?.strategic_override_pct ?? 0));
+  const netTermValue = netArr * TERM_YEARS;
 
   const unitNet = listArr > 0 ? netArr / (Number(line.quantity) || 1) : 0;
   const q1 = line.year1_qty ?? line.quantity;
@@ -89,8 +92,9 @@ export function computeLine(line: SkuLine, scenario?: Pick<Scenario, "scenario_d
   if (effectiveDiscountPct > threshold) warnings.push(`Effective discount ${effectiveDiscountPct.toFixed(1)}% exceeds the ${threshold}% approval threshold`);
   if (effectiveDiscountPct > (Number(line.max_discount_pct) || 100)) warnings.push("Net price is below the SKU discount floor");
 
-  return { listArr, afterLine, afterCategory, afterBulk, afterScenario, netArr, oneTimeValue, y1, y2, y3, tcv, effectiveDiscountPct, warnings };
+  return { listTermValue, netTermValue, listArr, afterLine, afterCategory, afterBulk, afterScenario, netArr, oneTimeValue, y1, y2, y3, tcv, effectiveDiscountPct, warnings };
 }
+
 
 export interface ScenarioTotals {
   listArr: number;
