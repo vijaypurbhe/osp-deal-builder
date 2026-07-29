@@ -73,7 +73,8 @@ export default function CataloguePage() {
                 <TableHead>Cloud / family</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>UoM</TableHead>
-                <TableHead className="text-right">List price</TableHead>
+                <TableHead className="text-right">List price (3-yr)</TableHead>
+                <TableHead className="text-right">Annualised</TableHead>
                 <TableHead className="text-right">Floor</TableHead>
                 <TableHead className="text-right">Eff. discount</TableHead>
                 <TableHead>Flags</TableHead>
