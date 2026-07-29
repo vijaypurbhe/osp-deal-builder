@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APPROVAL_STATUSES, BILLING_FREQUENCIES, CLASSIFICATIONS, UNITS_OF_MEASURE, type SkuLine } from "@/types/deal";
-import { AlertTriangle, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Lock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import LeverInput from "@/components/common/LeverInput";
 
@@ -64,6 +64,14 @@ export default function ScenarioBuilderPage() {
 
   return (
     <div className="space-y-6">
+      {locked && (
+        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          <Lock className="h-4 w-4" />
+          {scenario.is_locked
+            ? `${scenario.name} is locked — it is the reference baseline and is read-only.`
+            : "You do not have edit rights for this scenario."}
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="List ARR (annual)" value={currency(totals.listArr)} hint={`3-yr list ${currency(totals.listTermValue)}`} />
         <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`3-yr net ${currency(totals.netTermValue)}`} tone="positive" />
