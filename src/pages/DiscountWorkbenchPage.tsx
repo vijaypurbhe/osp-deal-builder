@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import LeverSlider from "@/components/common/LeverSlider";
 
 export default function DiscountWorkbenchPage() {
   const { activeScenarioId, canEdit } = useDeal();
@@ -71,7 +73,7 @@ export default function DiscountWorkbenchPage() {
       </SectionCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Scenario levers" description="Applied after line and category discounts">
+        <SectionCard title="Scenario levers" description="Drag a lever and release to apply it to the whole scenario">
           <div className="space-y-6">
             {([
               ["scenario_discount_pct", "Scenario discount"],
@@ -79,20 +81,18 @@ export default function DiscountWorkbenchPage() {
               ["strategic_override_pct", "Strategic override"],
               ["approval_threshold_pct", "Approval threshold"],
             ] as const).map(([field, label]) => (
-              <div key={field} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">{label}</Label>
-                  <span className="text-sm font-medium tabular-nums">{percent(scenario[field])}</span>
-                </div>
-                <Slider
-                  disabled={locked}
-                  value={[Number(scenario[field])]}
-                  min={0}
-                  max={80}
-                  step={0.5}
-                  onValueCommit={(v) => upsertScenario.mutate({ ...scenario, [field]: v[0] })}
-                />
-              </div>
+              <LeverSlider
+                key={field}
+                label={label}
+                value={Number(scenario[field])}
+                disabled={locked}
+                onCommit={(v) =>
+                  upsertScenario.mutate(
+                    { ...scenario, [field]: v },
+                    { onSuccess: () => toast.success(`${label} set to ${v}% — waterfall updated`) },
+                  )
+                }
+              />
             ))}
           </div>
         </SectionCard>
