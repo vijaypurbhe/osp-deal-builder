@@ -14,7 +14,14 @@ export function billingMultiplier(frequency: string): number {
   }
 }
 
+/** Contracted term length. SKU list prices in the deal book are stated for the full term. */
+export const TERM_YEARS = 3;
+
 export interface LineMath {
+  /** Term (3-year) list value as stated on the SKU. */
+  listTermValue: number;
+  /** Term (3-year) net value after the full discount waterfall. */
+  netTermValue: number;
   listArr: number;
   afterLine: number;
   afterCategory: number;
@@ -28,6 +35,7 @@ export interface LineMath {
   tcv: number;
   effectiveDiscountPct: number;
   warnings: string[];
+
 }
 
 const prorationFactor = (line: SkuLine): number => {
