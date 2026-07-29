@@ -41,7 +41,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Net ARR" value={currency(totals.netArr)} hint={`List ${compactCurrency(totals.listArr)}`} icon={CircleDollarSign} />
+        <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`Annual list ${compactCurrency(totals.listArr)} · 3-yr net ${compactCurrency(totals.netTermValue)}`} icon={CircleDollarSign} />
         <KpiCard label="3-year TCV" value={currency(totals.tcv)} hint={`Y1 ${compactCurrency(totals.y1)} · Y3 ${compactCurrency(totals.y3)}`} icon={TrendingUp} />
         <KpiCard
           label="Effective discount"
