@@ -28,12 +28,12 @@ export default function DiscountWorkbenchPage() {
   const locked = scenario?.is_locked || !canEdit;
 
   const waterfall = [
-    { stage: "List ARR", value: totals.listArr, type: "total" },
+    { stage: "List ARR (annual)", value: totals.listArr, type: "total" },
     { stage: "Line discounts", value: -totals.lineDiscountValue, type: "cut" },
     { stage: "Category discounts", value: -totals.categoryDiscountValue, type: "cut" },
     { stage: "Bulk discount", value: -totals.bulkDiscountValue, type: "cut" },
     { stage: "Scenario / override", value: -totals.overrideDiscountValue, type: "cut" },
-    { stage: "Net ARR", value: totals.netArr, type: "total" },
+    { stage: "Net ARR (annual)", value: totals.netArr, type: "total" },
   ];
 
   const breaches = (lines ?? [])
@@ -45,13 +45,14 @@ export default function DiscountWorkbenchPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="List ARR" value={currency(totals.listArr)} />
-        <KpiCard label="Total discount value" value={currency(totals.listArr - totals.netArr)} tone="warning" />
+        <KpiCard label="List ARR (annual)" value={currency(totals.listArr)} hint={`3-yr list ${currency(totals.listTermValue)}`} />
+        <KpiCard label="Total discount value" value={currency(totals.listTermValue - totals.netTermValue)} hint="Across the 3-year term" tone="warning" />
         <KpiCard label="Effective discount" value={percent(totals.effectiveDiscountPct)} tone={totals.effectiveDiscountPct > scenario.approval_threshold_pct ? "critical" : "positive"} />
         <KpiCard label="Lines breaching policy" value={String(breaches.length)} tone={breaches.length ? "critical" : "positive"} />
       </div>
 
-      <SectionCard title="Discount waterfall" description="List price through to net recurring value">
+      <SectionCard title="Discount waterfall" description="Annualised list price through to net recurring value (3-year list prices ÷ 3)">
+
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={waterfall} margin={{ left: 8, right: 8, top: 16 }}>

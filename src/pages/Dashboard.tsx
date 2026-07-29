@@ -41,7 +41,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Net ARR" value={currency(totals.netArr)} hint={`List ${compactCurrency(totals.listArr)}`} icon={CircleDollarSign} />
+        <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`Annual list ${compactCurrency(totals.listArr)} · 3-yr net ${compactCurrency(totals.netTermValue)}`} icon={CircleDollarSign} />
         <KpiCard label="3-year TCV" value={currency(totals.tcv)} hint={`Y1 ${compactCurrency(totals.y1)} · Y3 ${compactCurrency(totals.y3)}`} icon={TrendingUp} />
         <KpiCard
           label="Effective discount"
@@ -60,7 +60,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <SectionCard title="Net ARR by tower" description="Where the recurring value sits in the current scenario" className="lg:col-span-2">
+        <SectionCard title="Net ARR by tower" description="Annualised recurring value in the current scenario" className="lg:col-span-2">
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={towerData} margin={{ left: 8, right: 8 }}>
@@ -114,7 +114,7 @@ export default function Dashboard() {
                 <TableHead>Tower</TableHead>
                 <TableHead>Decision status</TableHead>
                 <TableHead>Confidence</TableHead>
-                <TableHead className="text-right">Net ARR</TableHead>
+                <TableHead className="text-right">Net ARR (annual)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -62,10 +62,11 @@ export default function ScenarioBuilderPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="List ARR" value={currency(totals.listArr)} />
-        <KpiCard label="Net ARR" value={currency(totals.netArr)} tone="positive" />
+        <KpiCard label="List ARR (annual)" value={currency(totals.listArr)} hint={`3-yr list ${currency(totals.listTermValue)}`} />
+        <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`3-yr net ${currency(totals.netTermValue)}`} tone="positive" />
         <KpiCard label="Effective discount" value={percent(totals.effectiveDiscountPct)} tone={totals.effectiveDiscountPct > scenario.approval_threshold_pct ? "critical" : "default"} />
         <KpiCard label="3-year TCV" value={currency(totals.tcv)} />
+
       </div>
 
       <SectionCard title="Scenario settings" description={scenario.description ?? "Commercial levers applied to every eligible line"}>
@@ -125,7 +126,7 @@ export default function ScenarioBuilderPage() {
                   <Input type="number" value={draft?.quantity ?? 1} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Unit list price</Label>
+                  <Label>Unit list price (3-year term)</Label>
                   <Input type="number" step="0.01" value={draft?.unit_list_price ?? 0} onChange={(e) => setDraft({ ...draft, unit_list_price: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
@@ -164,11 +165,12 @@ export default function ScenarioBuilderPage() {
               <TableRow>
                 <TableHead className="min-w-[220px]">SKU</TableHead>
                 <TableHead className="w-24">Qty</TableHead>
-                <TableHead className="w-28">List price</TableHead>
+                <TableHead className="w-28">List price (3-yr)</TableHead>
                 <TableHead className="w-24">Line %</TableHead>
                 <TableHead className="w-36">Billing</TableHead>
-                <TableHead className="text-right">Net ARR</TableHead>
-                <TableHead className="text-right">TCV</TableHead>
+                <TableHead className="text-right">Net ARR (annual)</TableHead>
+                <TableHead className="text-right">Net 3-yr TCV</TableHead>
+
                 <TableHead className="w-44">Status</TableHead>
                 <TableHead className="w-10" />
               </TableRow>

@@ -43,10 +43,11 @@ export default function OrderFormPage() {
         Classification: l.classification,
         Quantity: l.quantity,
         UoM: l.unit_of_measure,
-        "Unit list price": l.unit_list_price,
+        "Unit list price (3-yr)": l.unit_list_price,
         "Billing frequency": l.billing_frequency,
         "Effective discount %": Number(m.effectiveDiscountPct.toFixed(2)),
-        "Net ARR": Number(m.netArr.toFixed(2)),
+        "List ARR (annual)": Number(m.listArr.toFixed(2)),
+        "Net ARR (annual)": Number(m.netArr.toFixed(2)),
         "Year 1": Number(m.y1.toFixed(2)),
         "Year 2": Number(m.y2.toFixed(2)),
         "Year 3": Number(m.y3.toFixed(2)),
@@ -164,10 +165,10 @@ export default function OrderFormPage() {
                   <TableRow>
                     <TableHead>SKU</TableHead>
                     <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">List price</TableHead>
+                    <TableHead className="text-right">List price (3-yr)</TableHead>
                     <TableHead className="text-right">Eff. disc.</TableHead>
-                    <TableHead className="text-right">Net ARR</TableHead>
-                    <TableHead className="text-right">3-yr TCV</TableHead>
+                    <TableHead className="text-right">Net ARR (annual)</TableHead>
+                    <TableHead className="text-right">Net 3-yr TCV</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

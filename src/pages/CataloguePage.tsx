@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useDeal } from "@/context/DealContext";
 import { useAllSkuLines, useTowers } from "@/hooks/useDealData";
-import { computeLine } from "@/lib/pricing";
+import { computeLine, TERM_YEARS } from "@/lib/pricing";
 import { currency, number, percent } from "@/lib/format";
 import SectionCard from "@/components/common/SectionCard";
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,8 @@ export default function CataloguePage() {
                 <TableHead>Cloud / family</TableHead>
                 <TableHead>Classification</TableHead>
                 <TableHead>UoM</TableHead>
-                <TableHead className="text-right">List price</TableHead>
+                <TableHead className="text-right">List price (3-yr)</TableHead>
+                <TableHead className="text-right">Annualised</TableHead>
                 <TableHead className="text-right">Floor</TableHead>
                 <TableHead className="text-right">Eff. discount</TableHead>
                 <TableHead>Flags</TableHead>
@@ -81,10 +82,10 @@ export default function CataloguePage() {
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={8} className="text-muted-foreground">Loading catalogue…</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-muted-foreground">Loading catalogue…</TableCell></TableRow>
               )}
               {!isLoading && !catalogue.length && (
-                <TableRow><TableCell colSpan={8} className="text-muted-foreground">No SKUs match the current filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-muted-foreground">No SKUs match the current filters.</TableCell></TableRow>
               )}
               {catalogue.map(({ line, scenarios }) => {
                 const m = computeLine(line);
@@ -98,6 +99,7 @@ export default function CataloguePage() {
                     <TableCell><Badge variant="outline">{line.classification}</Badge></TableCell>
                     <TableCell className="text-sm">{line.unit_of_measure}</TableCell>
                     <TableCell className="text-right tabular-nums">{currency(line.unit_list_price, "USD", 2)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{currency(line.unit_list_price / TERM_YEARS, "USD", 2)}</TableCell>
                     <TableCell className="text-right tabular-nums">{percent(line.max_discount_pct, 0)}</TableCell>
                     <TableCell className="text-right tabular-nums">{percent(m.effectiveDiscountPct)}</TableCell>
                     <TableCell className="space-x-1">
