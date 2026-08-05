@@ -48,12 +48,54 @@ export default function Login() {
     toast.success("Account created. You can sign in now.");
   };
 
+  const sendReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    setResetSent(true);
+  };
+
   const google = async () => {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (result.error) return toast.error("Google sign-in failed");
     if (result.redirected) return;
     navigate("/", { replace: true });
   };
+
+  if (mode === "forgot") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-2 text-center">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">S+N</div>
+            <CardTitle className="font-display text-xl">Reset your password</CardTitle>
+            <CardDescription>We'll email you a secure link to set a new password.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {resetSent ? (
+              <div className="space-y-3 text-center">
+                <p className="text-sm">Check your inbox — if an account exists for <span className="font-medium">{email}</span>, a reset link is on its way. The link expires in 1 hour.</p>
+                <Button variant="outline" className="w-full" onClick={() => { setMode("auth"); setResetSent(false); }}>Back to sign in</Button>
+              </div>
+            ) : (
+              <form className="space-y-3" onSubmit={sendReset}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="reset-email">Work email</Label>
+                  <Input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>Send reset link</Button>
+                <Button type="button" variant="ghost" className="w-full" onClick={() => setMode("auth")}>Back to sign in</Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
