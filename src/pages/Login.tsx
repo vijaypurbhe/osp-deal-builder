@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { RESET_EMAIL_KEY } from "@/pages/ResetPassword";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useDeal } from "@/context/DealContext";
@@ -51,12 +52,14 @@ export default function Login() {
   const sendReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    localStorage.setItem(RESET_EMAIL_KEY, email);
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
     setResetSent(true);
   };
+
 
   const google = async () => {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
@@ -78,6 +81,10 @@ export default function Login() {
             {resetSent ? (
               <div className="space-y-3 text-center">
                 <p className="text-sm">Check your inbox — if an account exists for <span className="font-medium">{email}</span>, a reset link is on its way. The link expires in 1 hour.</p>
+                <p className="text-xs text-muted-foreground">If the link opens somewhere other than this app, come back here and continue with the code from the email instead.</p>
+                <Button asChild className="w-full">
+                  <Link to="/reset-password">Continue with a reset code</Link>
+                </Button>
                 <Button variant="outline" className="w-full" onClick={() => { setMode("auth"); setResetSent(false); }}>Back to sign in</Button>
               </div>
             ) : (
