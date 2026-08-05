@@ -22,6 +22,9 @@ export default function SettingsPage() {
   const [name, setName] = useState(profile?.display_name ?? "");
   const [org, setOrg] = useState(profile?.organisation ?? "");
   const [title, setTitle] = useState(profile?.job_title ?? "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
 
   const saveProfile = async () => {
     if (!profile) return;
@@ -30,6 +33,19 @@ export default function SettingsPage() {
     await refreshProfile();
     toast.success("Profile updated");
   };
+
+  const changePassword = async () => {
+    if (newPassword.length < 8) return toast.error("Password must be at least 8 characters.");
+    if (newPassword !== confirmPassword) return toast.error("The two passwords do not match.");
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwBusy(false);
+    if (error) return toast.error(error.message);
+    setNewPassword("");
+    setConfirmPassword("");
+    toast.success("Password changed");
+  };
+
 
   return (
     <div className="space-y-6">
