@@ -33,6 +33,7 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <DealProvider>
+          <RecoveryRedirect />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
