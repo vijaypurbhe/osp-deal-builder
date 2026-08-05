@@ -81,6 +81,10 @@ export default function Login() {
             {resetSent ? (
               <div className="space-y-3 text-center">
                 <p className="text-sm">Check your inbox — if an account exists for <span className="font-medium">{email}</span>, a reset link is on its way. The link expires in 1 hour.</p>
+                <p className="text-xs text-muted-foreground">If the link opens somewhere other than this app, come back here and continue with the code from the email instead.</p>
+                <Button asChild className="w-full">
+                  <Link to="/reset-password">Continue with a reset code</Link>
+                </Button>
                 <Button variant="outline" className="w-full" onClick={() => { setMode("auth"); setResetSent(false); }}>Back to sign in</Button>
               </div>
             ) : (
