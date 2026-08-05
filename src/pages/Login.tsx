@@ -17,6 +17,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<"auth" | "forgot">("auth");
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
     document.title = "Sign in · OSP Deal Builder";
