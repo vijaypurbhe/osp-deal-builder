@@ -22,6 +22,9 @@ export default function SettingsPage() {
   const [name, setName] = useState(profile?.display_name ?? "");
   const [org, setOrg] = useState(profile?.organisation ?? "");
   const [title, setTitle] = useState(profile?.job_title ?? "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
 
   const saveProfile = async () => {
     if (!profile) return;
@@ -30,6 +33,19 @@ export default function SettingsPage() {
     await refreshProfile();
     toast.success("Profile updated");
   };
+
+  const changePassword = async () => {
+    if (newPassword.length < 8) return toast.error("Password must be at least 8 characters.");
+    if (newPassword !== confirmPassword) return toast.error("The two passwords do not match.");
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwBusy(false);
+    if (error) return toast.error(error.message);
+    setNewPassword("");
+    setConfirmPassword("");
+    toast.success("Password changed");
+  };
+
 
   return (
     <div className="space-y-6">
@@ -45,6 +61,26 @@ export default function SettingsPage() {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Roles are granted by a deal architect and control who can edit pricing, models and order forms.</p>
       </SectionCard>
+
+      <SectionCard
+        title="Change password"
+        description="Update the password you use to sign in"
+        actions={<Button size="sm" onClick={changePassword} disabled={pwBusy}>Update password</Button>}
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="settings-new-password">New password</Label>
+            <Input id="settings-new-password" type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="settings-confirm-password">Confirm new password</Label>
+            <Input id="settings-confirm-password" type="password" autoComplete="new-password" minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">Minimum 8 characters. You stay signed in after changing it.</p>
+      </SectionCard>
+
+
 
       <SectionCard title="Scenarios" description="Lock scenarios once they are approved to prevent further edits">
         <Table>
