@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { RESET_EMAIL_KEY } from "@/pages/ResetPassword";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useDeal } from "@/context/DealContext";
