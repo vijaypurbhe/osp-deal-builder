@@ -122,6 +122,9 @@ export default function Login() {
                   <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={busy}>Sign in</Button>
+                <button type="button" className="w-full text-center text-xs text-muted-foreground underline-offset-4 hover:underline" onClick={() => setMode("forgot")}>
+                  Forgot your password?
+                </button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
