@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { DealProvider } from "@/context/DealContext";
 import RequireAuth from "@/components/layout/RequireAuth";
 import AppShell from "@/components/layout/AppShell";
+import RecoveryRedirect from "@/components/layout/RecoveryRedirect";
 
 import Login from "@/pages/Login";
 import ResetPassword from "@/pages/ResetPassword";
