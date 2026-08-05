@@ -51,12 +51,14 @@ export default function Login() {
   const sendReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    localStorage.setItem(RESET_EMAIL_KEY, email);
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
     setResetSent(true);
   };
+
 
   const google = async () => {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
