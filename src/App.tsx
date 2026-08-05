@@ -7,6 +7,7 @@ import RequireAuth from "@/components/layout/RequireAuth";
 import AppShell from "@/components/layout/AppShell";
 
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import CataloguePage from "@/pages/CataloguePage";
@@ -34,6 +35,7 @@ const App = () => (
         <DealProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               element={
                 <RequireAuth>
