@@ -225,3 +225,10 @@ export function useDeleteRow(table: TableName, invalidate: unknown[][]) {
     onError: fail,
   });
 }
+
+/** The currently selected deal record (or null while deals load). */
+export function useActiveDeal() {
+  const { activeDealId } = useDeal();
+  const { data } = useDeals();
+  return (data ?? []).find((d) => d.id === activeDealId) ?? null;
+}

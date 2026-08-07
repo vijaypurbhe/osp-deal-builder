@@ -18,7 +18,7 @@ const STATUSES = ["Open", "In discussion", "Awaiting vendor", "Awaiting customer
 const INCLUSION = ["Include", "Exclude", "Optional", "Undecided"];
 
 export default function DiscussionPage() {
-  const { canEdit } = useDeal();
+  const { canEdit, activeDealId } = useDeal();
   const { data: items } = useDiscussionItems();
   const upsert = useUpsertRow("discussion_items", [["discussion_items"]]);
   const [open, setOpen] = useState(false);
@@ -70,7 +70,7 @@ export default function DiscussionPage() {
                   <div className="space-y-1.5"><Label>Owner</Label><Input value={draft.owner} onChange={(e) => setDraft({ ...draft, owner: e.target.value })} /></div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => { if (draft.title) { upsert.mutate(draft); setOpen(false); } }}>Add</Button>
+                  <Button onClick={() => { if (draft.title) { upsert.mutate({ ...draft, deal_id: activeDealId }); setOpen(false); } }}>Add</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { useDeal } from "@/context/DealContext";
-import { useDeleteRow, useOrderForms, useScenarios, useSkuLines, useUpsertRow } from "@/hooks/useDealData";
+import { useActiveDeal, useDeleteRow, useOrderForms, useScenarios, useSkuLines, useUpsertRow } from "@/hooks/useDealData";
 import { computeLine, computeScenario } from "@/lib/pricing";
 import { currency, percent, shortDate } from "@/lib/format";
 import SectionCard from "@/components/common/SectionCard";
@@ -20,6 +20,7 @@ export default function OrderFormPage() {
   const { data: scenarios } = useScenarios();
   const { data: forms } = useOrderForms(activeScenarioId);
   const { data: lines } = useSkuLines(activeScenarioId);
+  const activeDeal = useActiveDeal();
   const upsertForm = useUpsertRow("order_forms", [["order_forms", activeScenarioId]]);
   const deleteForm = useDeleteRow("order_forms", [["order_forms", activeScenarioId]]);
   const scenario = scenarios?.find((s) => s.id === activeScenarioId);
