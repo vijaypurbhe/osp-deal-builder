@@ -38,13 +38,13 @@ export const DEFAULT_TOWER_SEED = [
 ];
 
 const DEFAULT_SCENARIOS = [
-  { name: "Current BOM Baseline", is_baseline: true, is_locked: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Reference bill of materials — read only" },
-  { name: "Expected Landing Zone", is_recommended: true, scenario_discount_pct: 12, bulk_discount_pct: 6, strategic_override_pct: 2, sort_order: 1, description: "Most likely commercial landing point" },
-  { name: "Strategic Upside", scenario_discount_pct: 18, bulk_discount_pct: 8, strategic_override_pct: 4, sort_order: 2, description: "Expanded scope with deeper discount posture" },
+  { name: "Current BOM Baseline", is_baseline: true, is_recommended: false, is_locked: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Reference bill of materials — read only" },
+  { name: "Expected Landing Zone", is_baseline: false, is_recommended: true, is_locked: false, scenario_discount_pct: 12, bulk_discount_pct: 6, strategic_override_pct: 2, sort_order: 1, description: "Most likely commercial landing point" },
+  { name: "Strategic Upside", is_baseline: false, is_recommended: false, is_locked: false, scenario_discount_pct: 18, bulk_discount_pct: 8, strategic_override_pct: 4, sort_order: 2, description: "Expanded scope with deeper discount posture" },
 ];
 
 const SINGLE_SCENARIO = [
-  { name: "Working Scenario", is_baseline: true, is_recommended: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Primary working scenario" },
+  { name: "Working Scenario", is_baseline: true, is_recommended: true, is_locked: false, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Primary working scenario" },
 ];
 
 export interface LibrarySelection {
