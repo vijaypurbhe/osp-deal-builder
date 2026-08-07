@@ -38,18 +38,36 @@ export const DEFAULT_TOWER_SEED = [
 ];
 
 const DEFAULT_SCENARIOS = [
-  { name: "Current BOM Baseline", is_baseline: true, is_locked: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Reference bill of materials — read only" },
-  { name: "Expected Landing Zone", is_recommended: true, scenario_discount_pct: 12, bulk_discount_pct: 6, strategic_override_pct: 2, sort_order: 1, description: "Most likely commercial landing point" },
-  { name: "Strategic Upside", scenario_discount_pct: 18, bulk_discount_pct: 8, strategic_override_pct: 4, sort_order: 2, description: "Expanded scope with deeper discount posture" },
+  { name: "Current BOM Baseline", is_baseline: true, is_recommended: false, is_locked: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Reference bill of materials — read only" },
+  { name: "Expected Landing Zone", is_baseline: false, is_recommended: true, is_locked: false, scenario_discount_pct: 12, bulk_discount_pct: 6, strategic_override_pct: 2, sort_order: 1, description: "Most likely commercial landing point" },
+  { name: "Strategic Upside", is_baseline: false, is_recommended: false, is_locked: false, scenario_discount_pct: 18, bulk_discount_pct: 8, strategic_override_pct: 4, sort_order: 2, description: "Expanded scope with deeper discount posture" },
 ];
 
 const SINGLE_SCENARIO = [
-  { name: "Working Scenario", is_baseline: true, is_recommended: true, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Primary working scenario" },
+  { name: "Working Scenario", is_baseline: true, is_recommended: true, is_locked: false, scenario_discount_pct: 0, bulk_discount_pct: 0, strategic_override_pct: 0, sort_order: 0, description: "Primary working scenario" },
 ];
 
 export interface LibrarySelection {
   libraryId: string;
   quantity: number;
+}
+
+/** A BOM row parsed from an uploaded workbook, ready to become a sku_lines record. */
+export interface ImportedLine {
+  sku_name: string;
+  sku_code: string | null;
+  description: string | null;
+  product_family: string | null;
+  cloud: string | null;
+  tower_key: string | null;
+  classification: string;
+  quantity: number;
+  unit_of_measure: string;
+  unit_list_price: number;
+  billing_frequency: string;
+  line_discount_pct: number;
+  source_tab: string | null;
+  source_file: string | null;
 }
 
 export interface NewDealInput {
@@ -65,9 +83,12 @@ export interface NewDealInput {
   /** How the starting bill of materials is populated. */
   source: "blank" | "library" | "clone" | "import";
   librarySelections?: LibrarySelection[];
+  /** Rows parsed from an uploaded BOM workbook (source === "import"). */
+  importLines?: ImportedLine[];
   sourceDealId?: string | null;
   scenarioPreset: "default" | "single";
 }
+
 
 const strip = <T extends { id: string }>(row: T) => {
   const { id, ...rest } = row as Record<string, unknown> & { id: string };
@@ -168,16 +189,34 @@ export function useCreateDeal() {
           }
           await insertRows("sku_lines", lines);
         }
+
+        // Starting BOM from an uploaded workbook
+        if (input.source === "import" && input.importLines?.length) {
+          const lines: Record<string, unknown>[] = [];
+          for (const scenarioId of scenarioIds) {
+            for (const line of input.importLines) {
+              lines.push({ ...line, scenario_id: scenarioId, bom_type: "revised", approval_status: "Draft" });
+            }
+          }
+          await insertRows("sku_lines", lines);
+        }
       }
 
       return deal;
     },
     onSuccess: (deal) => {
+      // Seed the cache so the header can switch to the new deal before the refetch lands.
+      qc.setQueryData<Deal[]>(["deals"], (prev) => [...(prev ?? []), deal]);
       qc.invalidateQueries();
       toast.success(`Deal "${deal.name}" created`);
     },
     onError: (e: unknown) => {
-      const message = e instanceof Error ? e.message : String(e);
+      const message =
+        e instanceof Error
+          ? e.message
+          : typeof e === "object" && e && "message" in e
+            ? String((e as { message: unknown }).message)
+            : String(e);
       toast.error(message.includes("row-level security") ? "You do not have rights to create deals." : message);
     },
   });
