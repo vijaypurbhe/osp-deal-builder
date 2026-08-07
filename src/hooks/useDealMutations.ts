@@ -209,7 +209,12 @@ export function useCreateDeal() {
       toast.success(`Deal "${deal.name}" created`);
     },
     onError: (e: unknown) => {
-      const message = e instanceof Error ? e.message : String(e);
+      const message =
+        e instanceof Error
+          ? e.message
+          : typeof e === "object" && e && "message" in e
+            ? String((e as { message: unknown }).message)
+            : String(e);
       toast.error(message.includes("row-level security") ? "You do not have rights to create deals." : message);
     },
   });
