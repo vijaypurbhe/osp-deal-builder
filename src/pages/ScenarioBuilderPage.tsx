@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { NumberCell } from "@/components/common/NumberCell";
 import { useDeal } from "@/context/DealContext";
+import LibraryPicker from "@/components/deals/LibraryPicker";
+import { useAddLibraryLines, type LibrarySelection } from "@/hooks/useDealMutations";
 import { useDeleteRow, useScenarios, useSkuLines, useTowers, useUpsertRow } from "@/hooks/useDealData";
 import { computeLine, computeScenario } from "@/lib/pricing";
 import { currency, number, percent } from "@/lib/format";
@@ -56,6 +58,9 @@ export default function ScenarioBuilderPage() {
   const scenario = scenarios?.find((s) => s.id === activeScenarioId);
   const totals = useMemo(() => computeScenario(lines ?? [], scenario), [lines, scenario]);
   const [draft, setDraft] = useState<Partial<SkuLine> | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [librarySelections, setLibrarySelections] = useState<LibrarySelection[]>([]);
+  const addFromLibrary = useAddLibraryLines(activeScenarioId);
   const locked = scenario?.is_locked || !canEdit;
 
   const patch = (line: SkuLine, changes: Partial<SkuLine>) => upsertLine.mutate({ ...line, ...changes });
@@ -113,6 +118,10 @@ export default function ScenarioBuilderPage() {
         title="Bill of materials"
         description={`${number((lines ?? []).length)} lines · ${number(totals.warnings)} pricing warnings`}
         actions={
+          <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" disabled={locked} onClick={() => setLibraryOpen(true)}>
+            <Library className="mr-1.5 h-4 w-4" /> Add from library
+          </Button>
           <Dialog open={!!draft} onOpenChange={(o) => setDraft(o ? emptyLine(scenario.id) : null)}>
             <DialogTrigger asChild>
               <Button size="sm" disabled={locked}><Plus className="mr-1.5 h-4 w-4" /> Add SKU line</Button>
