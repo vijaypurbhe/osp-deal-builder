@@ -52,6 +52,24 @@ export interface LibrarySelection {
   quantity: number;
 }
 
+/** A BOM row parsed from an uploaded workbook, ready to become a sku_lines record. */
+export interface ImportedLine {
+  sku_name: string;
+  sku_code: string | null;
+  description: string | null;
+  product_family: string | null;
+  cloud: string | null;
+  tower_key: string | null;
+  classification: string;
+  quantity: number;
+  unit_of_measure: string;
+  unit_list_price: number;
+  billing_frequency: string;
+  line_discount_pct: number;
+  source_tab: string | null;
+  source_file: string | null;
+}
+
 export interface NewDealInput {
   name: string;
   customer_name: string;
@@ -65,9 +83,12 @@ export interface NewDealInput {
   /** How the starting bill of materials is populated. */
   source: "blank" | "library" | "clone" | "import";
   librarySelections?: LibrarySelection[];
+  /** Rows parsed from an uploaded BOM workbook (source === "import"). */
+  importLines?: ImportedLine[];
   sourceDealId?: string | null;
   scenarioPreset: "default" | "single";
 }
+
 
 const strip = <T extends { id: string }>(row: T) => {
   const { id, ...rest } = row as Record<string, unknown> & { id: string };
