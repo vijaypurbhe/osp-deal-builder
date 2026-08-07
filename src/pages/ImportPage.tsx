@@ -69,6 +69,7 @@ export default function ImportPage() {
   const [activeTabs, setActiveTabs] = useState<string[]>([]);
   const [targetScenarioId, setTargetScenarioId] = useState<string>("");
   const [dealOpen, setDealOpen] = useState(false);
+  const [dealStep, setDealStep] = useState<"details" | "preview">("details");
   const [dealForm, setDealForm] = useState({
     name: "",
     customer_name: "",
@@ -88,6 +89,20 @@ export default function ImportPage() {
     () => validRows.reduce((sum, r) => sum + r.quantity * r.unit_list_price, 0),
     [validRows],
   );
+
+  /** Grouped preview of the towers and lines that the new deal will be seeded with. */
+  const towerPreview = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; lines: ParsedRow[]; value: number }>();
+    for (const r of validRows) {
+      const key = r.tower_key ?? "core";
+      const name = DEFAULT_TOWER_SEED.find((t) => t.key === key)?.name ?? key;
+      const entry = map.get(key) ?? { key, name, lines: [], value: 0 };
+      entry.lines.push(r);
+      entry.value += r.quantity * r.unit_list_price;
+      map.set(key, entry);
+    }
+    return [...map.values()].sort((a, b) => b.value - a.value);
+  }, [validRows]);
 
   const parseSheet = (sheet: XLSX.WorkSheet, tab: string, file: string): ParsedRow[] => {
     const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
@@ -331,15 +346,19 @@ export default function ImportPage() {
         </SectionCard>
       )}
 
-      <Dialog open={dealOpen} onOpenChange={setDealOpen}>
+      <Dialog open={dealOpen} onOpenChange={(o) => { setDealOpen(o); if (!o) setDealStep("details"); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create a deal from this BOM</DialogTitle>
+            <DialogTitle>
+              {dealStep === "details" ? "Create a deal from this BOM" : "Confirm the parsed BOM"}
+            </DialogTitle>
             <DialogDescription>
-              {number(validRows.length)} lines will be loaded into every scenario of the new deal.
+              {dealStep === "details"
+                ? `Step 1 of 2 · ${number(validRows.length)} lines will be loaded into every scenario of the new deal.`
+                : `Step 2 of 2 · review ${number(towerPreview.length)} towers and ${number(validRows.length)} SKU lines before the deal is created.`}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className={dealStep === "details" ? "grid gap-4 md:grid-cols-2" : "hidden"}>
             <div className="space-y-1.5 md:col-span-2">
               <Label>Deal name</Label>
               <Input value={dealForm.name} onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })} />
@@ -384,9 +403,68 @@ export default function ImportPage() {
               </Select>
             </div>
           </div>
+
+          {dealStep === "preview" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Towers", value: number(towerPreview.length) },
+                  { label: "SKU lines", value: number(validRows.length) },
+                  { label: "List term value", value: currency(totalTermValue, dealForm.currency.toUpperCase() || "USD") },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-md border bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className="font-display text-lg tabular-nums">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="max-h-[300px] space-y-3 overflow-auto pr-1">
+                {towerPreview.map((t) => (
+                  <div key={t.key} className="rounded-md border">
+                    <div className="flex items-center justify-between gap-3 border-b bg-muted/30 px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{t.name}</p>
+                        <Badge variant="outline">{t.lines.length} lines</Badge>
+                      </div>
+                      <p className="text-sm tabular-nums">{currency(t.value, dealForm.currency.toUpperCase() || "USD")}</p>
+                    </div>
+                    <div className="divide-y">
+                      {t.lines.map((l, i) => (
+                        <div key={`${t.key}-${l.sku_name}-${i}`} className="flex items-center justify-between gap-3 px-3 py-1.5 text-xs">
+                          <span className="truncate">{l.sku_name}</span>
+                          <span className="shrink-0 tabular-nums text-muted-foreground">
+                            {number(l.quantity)} × {currency(l.unit_list_price, dealForm.currency.toUpperCase() || "USD")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDealOpen(false)}>Cancel</Button>
-            <Button onClick={createDealFromBom} disabled={createDeal.isPending}>Create deal</Button>
+            {dealStep === "details" ? (
+              <>
+                <Button variant="outline" onClick={() => setDealOpen(false)}>Cancel</Button>
+                <Button
+                  onClick={() => {
+                    if (!dealForm.name.trim() || !dealForm.customer_name.trim())
+                      return toast.error("Deal name and customer are required");
+                    setDealStep("preview");
+                  }}
+                >
+                  Review parsed BOM
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setDealStep("details")}>Back</Button>
+                <Button onClick={createDealFromBom} disabled={createDeal.isPending}>Confirm and create deal</Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
