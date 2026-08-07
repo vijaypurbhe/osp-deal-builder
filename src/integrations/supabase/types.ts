@@ -55,11 +55,66 @@ export type Database = {
           },
         ]
       }
+      deals: {
+        Row: {
+          contract_end: string | null
+          contract_start: string | null
+          created_at: string
+          currency: string
+          customer_name: string
+          id: string
+          is_archived: boolean
+          name: string
+          notes: string | null
+          owner_id: string | null
+          owner_name: string | null
+          partner_name: string
+          sort_order: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          currency?: string
+          customer_name?: string
+          id?: string
+          is_archived?: boolean
+          name: string
+          notes?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          partner_name?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          currency?: string
+          customer_name?: string
+          id?: string
+          is_archived?: boolean
+          name?: string
+          notes?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          partner_name?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discussion_items: {
         Row: {
           area: string
           commercial_impact: string | null
           created_at: string
+          deal_id: string
           decision_needed: string | null
           description: string | null
           id: string
@@ -75,6 +130,7 @@ export type Database = {
           area: string
           commercial_impact?: string | null
           created_at?: string
+          deal_id: string
           decision_needed?: string | null
           description?: string | null
           id?: string
@@ -90,6 +146,7 @@ export type Database = {
           area?: string
           commercial_impact?: string | null
           created_at?: string
+          deal_id?: string
           decision_needed?: string | null
           description?: string | null
           id?: string
@@ -101,7 +158,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "discussion_items_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       import_batches: {
         Row: {
@@ -325,6 +390,7 @@ export type Database = {
           category: string
           commercial_impact: string | null
           created_at: string
+          deal_id: string
           decision_needed_by: string | null
           description: string
           id: string
@@ -342,6 +408,7 @@ export type Database = {
           category: string
           commercial_impact?: string | null
           created_at?: string
+          deal_id: string
           decision_needed_by?: string | null
           description: string
           id?: string
@@ -359,6 +426,7 @@ export type Database = {
           category?: string
           commercial_impact?: string | null
           created_at?: string
+          deal_id?: string
           decision_needed_by?: string | null
           description?: string
           id?: string
@@ -372,7 +440,15 @@ export type Database = {
           technical_impact?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "risk_log_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scenario_models: {
         Row: {
@@ -418,6 +494,7 @@ export type Database = {
           contract_start: string | null
           created_at: string
           currency: string
+          deal_id: string
           description: string | null
           id: string
           is_baseline: boolean
@@ -441,6 +518,7 @@ export type Database = {
           contract_start?: string | null
           created_at?: string
           currency?: string
+          deal_id: string
           description?: string | null
           id?: string
           is_baseline?: boolean
@@ -464,6 +542,7 @@ export type Database = {
           contract_start?: string | null
           created_at?: string
           currency?: string
+          deal_id?: string
           description?: string | null
           id?: string
           is_baseline?: boolean
@@ -477,6 +556,65 @@ export type Database = {
           sort_order?: number
           status?: string
           strategic_override_pct?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sku_library: {
+        Row: {
+          billing_frequency: string
+          cloud: string | null
+          created_at: string
+          default_tower_key: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          product_category: string | null
+          product_family: string | null
+          sku_code: string | null
+          sku_name: string
+          unit_list_price: number
+          unit_of_measure: string
+          updated_at: string
+        }
+        Insert: {
+          billing_frequency?: string
+          cloud?: string | null
+          created_at?: string
+          default_tower_key?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_category?: string | null
+          product_family?: string | null
+          sku_code?: string | null
+          sku_name: string
+          unit_list_price?: number
+          unit_of_measure?: string
+          updated_at?: string
+        }
+        Update: {
+          billing_frequency?: string
+          cloud?: string | null
+          created_at?: string
+          default_tower_key?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_category?: string | null
+          product_family?: string | null
+          sku_code?: string | null
+          sku_name?: string
+          unit_list_price?: number
+          unit_of_measure?: string
           updated_at?: string
         }
         Relationships: []
@@ -616,6 +754,7 @@ export type Database = {
         Row: {
           confidence: string
           created_at: string
+          deal_id: string
           decision_status: string
           description: string | null
           id: string
@@ -627,6 +766,7 @@ export type Database = {
         Insert: {
           confidence?: string
           created_at?: string
+          deal_id: string
           decision_status?: string
           description?: string | null
           id?: string
@@ -638,6 +778,7 @@ export type Database = {
         Update: {
           confidence?: string
           created_at?: string
+          deal_id?: string
           decision_status?: string
           description?: string | null
           id?: string
@@ -646,7 +787,15 @@ export type Database = {
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "towers_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
