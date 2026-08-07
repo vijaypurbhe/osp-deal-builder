@@ -71,8 +71,42 @@ export const DEAL_ROLES = [
 
 export type DealRole = (typeof DEAL_ROLES)[number]["key"];
 
+export interface Deal {
+  id: string;
+  name: string;
+  customer_name: string;
+  partner_name: string;
+  currency: string;
+  contract_start: string | null;
+  contract_end: string | null;
+  status: string;
+  owner_id: string | null;
+  owner_name: string | null;
+  notes: string | null;
+  is_archived: boolean;
+  sort_order: number;
+}
+
+export interface SkuLibraryItem {
+  id: string;
+  sku_code: string | null;
+  sku_name: string;
+  description: string | null;
+  product_family: string | null;
+  product_category: string | null;
+  cloud: string | null;
+  unit_of_measure: string;
+  unit_list_price: number;
+  billing_frequency: string;
+  default_tower_key: string | null;
+  is_active: boolean;
+}
+
+export const DEAL_STATUSES = ["Active", "Shaping", "Submitted", "Won", "Lost", "On hold"] as const;
+
 export interface Scenario {
   id: string;
+  deal_id: string;
   name: string;
   description: string | null;
   status: string;
@@ -134,6 +168,7 @@ export interface SkuLine {
 
 export interface Tower {
   id: string;
+  deal_id: string;
   key: string;
   name: string;
   description: string | null;
@@ -144,6 +179,7 @@ export interface Tower {
 
 export interface DiscussionItem {
   id: string;
+  deal_id: string;
   area: string;
   title: string;
   description: string | null;
@@ -158,6 +194,7 @@ export interface DiscussionItem {
 
 export interface RiskEntry {
   id: string;
+  deal_id: string;
   ref_code: string | null;
   category: string;
   description: string;

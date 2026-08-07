@@ -12,6 +12,8 @@ import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import CataloguePage from "@/pages/CataloguePage";
+import DealsPage from "@/pages/DealsPage";
+import SkuLibraryPage from "@/pages/SkuLibraryPage";
 import ScenarioBuilderPage from "@/pages/ScenarioBuilderPage";
 import ScenarioComparePage from "@/pages/ScenarioComparePage";
 import DiscountWorkbenchPage from "@/pages/DiscountWorkbenchPage";
@@ -46,7 +48,9 @@ const App = () => (
               }
             >
               <Route path="/" element={<Dashboard />} />
+              <Route path="/deals" element={<DealsPage />} />
               <Route path="/catalogue" element={<CataloguePage />} />
+              <Route path="/sku-library" element={<SkuLibraryPage />} />
               <Route path="/scenarios" element={<ScenarioBuilderPage />} />
               <Route path="/compare" element={<ScenarioComparePage />} />
               <Route path="/discounts" element={<DiscountWorkbenchPage />} />

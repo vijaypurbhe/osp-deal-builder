@@ -19,6 +19,8 @@ interface DealContextValue {
   canEdit: boolean;
   isArchitect: boolean;
   loading: boolean;
+  activeDealId: string | null;
+  setActiveDealId: (id: string) => void;
   activeScenarioId: string | null;
   setActiveScenarioId: (id: string) => void;
   refreshProfile: () => Promise<void>;
@@ -29,6 +31,7 @@ const DealContext = createContext<DealContextValue | undefined>(undefined);
 
 const EDIT_ROLES: DealRole[] = ["deal_architect", "salesforce_ae", "tm_osp_lead"];
 const SCENARIO_KEY = "osp.activeScenario";
+const DEAL_KEY = "osp.activeDeal";
 
 export function DealProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -36,6 +39,7 @@ export function DealProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<DealRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeScenarioId, setActive] = useState<string | null>(() => localStorage.getItem(SCENARIO_KEY));
+  const [activeDealId, setDeal] = useState<string | null>(() => localStorage.getItem(DEAL_KEY));
 
   const loadProfile = useCallback(async (u: User) => {
     const { data } = await supabase.from("profiles").select("*").eq("id", u.id).maybeSingle();
@@ -76,6 +80,17 @@ export function DealProvider({ children }: { children: ReactNode }) {
     setActive(id);
   }, []);
 
+  const setActiveDealId = useCallback((id: string) => {
+    setDeal((prev) => {
+      if (prev === id) return prev;
+      localStorage.setItem(DEAL_KEY, id);
+      // A scenario belongs to a single deal, so clear it when the deal changes.
+      localStorage.removeItem(SCENARIO_KEY);
+      setActive(null);
+      return id;
+    });
+  }, []);
+
   const value = useMemo<DealContextValue>(
     () => ({
       session,
@@ -85,6 +100,8 @@ export function DealProvider({ children }: { children: ReactNode }) {
       canEdit: roles.some((r) => EDIT_ROLES.includes(r)),
       isArchitect: roles.includes("deal_architect"),
       loading,
+      activeDealId,
+      setActiveDealId,
       activeScenarioId,
       setActiveScenarioId,
       refreshProfile: async () => {
@@ -94,7 +111,7 @@ export function DealProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [session, profile, roles, loading, activeScenarioId, setActiveScenarioId, loadProfile],
+    [session, profile, roles, loading, activeDealId, setActiveDealId, activeScenarioId, setActiveScenarioId, loadProfile],
   );
 
   return <DealContext.Provider value={value}>{children}</DealContext.Provider>;

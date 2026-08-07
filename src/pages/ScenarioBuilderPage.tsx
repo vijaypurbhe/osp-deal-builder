@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { NumberCell } from "@/components/common/NumberCell";
 import { useDeal } from "@/context/DealContext";
+import LibraryPicker from "@/components/deals/LibraryPicker";
+import { useAddLibraryLines, type LibrarySelection } from "@/hooks/useDealMutations";
 import { useDeleteRow, useScenarios, useSkuLines, useTowers, useUpsertRow } from "@/hooks/useDealData";
 import { computeLine, computeScenario } from "@/lib/pricing";
 import { currency, number, percent } from "@/lib/format";
@@ -17,7 +19,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APPROVAL_STATUSES, BILLING_FREQUENCIES, CLASSIFICATIONS, UNITS_OF_MEASURE, type SkuLine } from "@/types/deal";
-import { AlertTriangle, Lock, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Library, Lock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import LeverInput from "@/components/common/LeverInput";
 
@@ -56,6 +58,9 @@ export default function ScenarioBuilderPage() {
   const scenario = scenarios?.find((s) => s.id === activeScenarioId);
   const totals = useMemo(() => computeScenario(lines ?? [], scenario), [lines, scenario]);
   const [draft, setDraft] = useState<Partial<SkuLine> | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [librarySelections, setLibrarySelections] = useState<LibrarySelection[]>([]);
+  const addFromLibrary = useAddLibraryLines(activeScenarioId);
   const locked = scenario?.is_locked || !canEdit;
 
   const patch = (line: SkuLine, changes: Partial<SkuLine>) => upsertLine.mutate({ ...line, ...changes });
@@ -113,6 +118,10 @@ export default function ScenarioBuilderPage() {
         title="Bill of materials"
         description={`${number((lines ?? []).length)} lines · ${number(totals.warnings)} pricing warnings`}
         actions={
+          <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" disabled={locked} onClick={() => setLibraryOpen(true)}>
+            <Library className="mr-1.5 h-4 w-4" /> Add from library
+          </Button>
           <Dialog open={!!draft} onOpenChange={(o) => setDraft(o ? emptyLine(scenario.id) : null)}>
             <DialogTrigger asChild>
               <Button size="sm" disabled={locked}><Plus className="mr-1.5 h-4 w-4" /> Add SKU line</Button>
@@ -171,7 +180,30 @@ export default function ScenarioBuilderPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <Dialog open={libraryOpen} onOpenChange={(o) => { setLibraryOpen(o); if (!o) setLibrarySelections([]); }}>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Add SKUs from the library</DialogTitle>
+              </DialogHeader>
+              <LibraryPicker value={librarySelections} onChange={setLibrarySelections} />
+              <DialogFooter>
+                <Button
+                  disabled={!librarySelections.length || addFromLibrary.isPending}
+                  onClick={() =>
+                    addFromLibrary.mutate(librarySelections, {
+                      onSuccess: () => { setLibraryOpen(false); setLibrarySelections([]); },
+                    })
+                  }
+                >
+                  Add {librarySelections.length || ""} line{librarySelections.length === 1 ? "" : "s"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          </div>
         }
+
       >
         <div className="overflow-x-auto">
           <Table>
@@ -257,7 +289,7 @@ export default function ScenarioBuilderPage() {
                   <Switch checked={line.needs_salesforce_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_salesforce_confirmation: v })} /> SFDC
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  <Switch checked={line.needs_sn_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_sn_confirmation: v })} /> S+N
+                  <Switch checked={line.needs_sn_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_sn_confirmation: v })} /> Customer
                 </label>
               </div>
             </div>

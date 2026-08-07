@@ -73,7 +73,7 @@ export default function Login() {
       <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-2 text-center">
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">S+N</div>
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
             <CardTitle className="font-display text-xl">Reset your password</CardTitle>
             <CardDescription>We'll email you a secure link to set a new password.</CardDescription>
           </CardHeader>
@@ -108,9 +108,9 @@ export default function Login() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">S+N</div>
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
           <CardTitle className="font-display text-xl">OSP Deal Builder</CardTitle>
-          <CardDescription>Smith+Nephew Salesforce estate — commercial modelling workspace</CardDescription>
+          <CardDescription>Salesforce OSP deal shaping — commercial modelling workspace</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs defaultValue="signin">

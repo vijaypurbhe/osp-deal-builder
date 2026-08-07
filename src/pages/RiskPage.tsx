@@ -19,7 +19,7 @@ const LEVELS = ["Low", "Medium", "High"] as const;
 const STATUSES = ["Open", "Mitigating", "Accepted", "Closed"];
 
 export default function RiskPage() {
-  const { canEdit } = useDeal();
+  const { canEdit, activeDealId } = useDeal();
   const { data: risks } = useRiskLog();
   const upsert = useUpsertRow("risk_log", [["risk_log"]]);
   const [open, setOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function RiskPage() {
                 <div className="space-y-1.5"><Label>Description</Label><Textarea value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></div>
                 <div className="space-y-1.5"><Label>Owner</Label><Input value={draft.owner} onChange={(e) => setDraft({ ...draft, owner: e.target.value })} /></div>
               </div>
-              <DialogFooter><Button onClick={() => { if (draft.description) { upsert.mutate(draft); setOpen(false); } }}>Add</Button></DialogFooter>
+              <DialogFooter><Button onClick={() => { if (draft.description) { upsert.mutate({ ...draft, deal_id: activeDealId }); setOpen(false); } }}>Add</Button></DialogFooter>
             </DialogContent>
           </Dialog>
         }

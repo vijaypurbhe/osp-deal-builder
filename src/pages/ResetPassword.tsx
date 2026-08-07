@@ -83,7 +83,7 @@ export default function ResetPassword() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">S+N</div>
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
           <CardTitle className="font-display text-xl">
             {state === "needs_code" ? "Confirm your reset code" : "Set a new password"}
           </CardTitle>
