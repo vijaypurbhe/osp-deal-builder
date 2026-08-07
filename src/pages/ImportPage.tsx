@@ -403,9 +403,68 @@ export default function ImportPage() {
               </Select>
             </div>
           </div>
+
+          {dealStep === "preview" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Towers", value: number(towerPreview.length) },
+                  { label: "SKU lines", value: number(validRows.length) },
+                  { label: "List term value", value: currency(totalTermValue, dealForm.currency.toUpperCase() || "USD") },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-md border bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className="font-display text-lg tabular-nums">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="max-h-[300px] space-y-3 overflow-auto pr-1">
+                {towerPreview.map((t) => (
+                  <div key={t.key} className="rounded-md border">
+                    <div className="flex items-center justify-between gap-3 border-b bg-muted/30 px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{t.name}</p>
+                        <Badge variant="outline">{t.lines.length} lines</Badge>
+                      </div>
+                      <p className="text-sm tabular-nums">{currency(t.value, dealForm.currency.toUpperCase() || "USD")}</p>
+                    </div>
+                    <div className="divide-y">
+                      {t.lines.map((l, i) => (
+                        <div key={`${t.key}-${l.sku_name}-${i}`} className="flex items-center justify-between gap-3 px-3 py-1.5 text-xs">
+                          <span className="truncate">{l.sku_name}</span>
+                          <span className="shrink-0 tabular-nums text-muted-foreground">
+                            {number(l.quantity)} × {currency(l.unit_list_price, dealForm.currency.toUpperCase() || "USD")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDealOpen(false)}>Cancel</Button>
-            <Button onClick={createDealFromBom} disabled={createDeal.isPending}>Create deal</Button>
+            {dealStep === "details" ? (
+              <>
+                <Button variant="outline" onClick={() => setDealOpen(false)}>Cancel</Button>
+                <Button
+                  onClick={() => {
+                    if (!dealForm.name.trim() || !dealForm.customer_name.trim())
+                      return toast.error("Deal name and customer are required");
+                    setDealStep("preview");
+                  }}
+                >
+                  Review parsed BOM
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setDealStep("details")}>Back</Button>
+                <Button onClick={createDealFromBom} disabled={createDeal.isPending}>Confirm and create deal</Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
