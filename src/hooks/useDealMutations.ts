@@ -205,6 +205,8 @@ export function useCreateDeal() {
       return deal;
     },
     onSuccess: (deal) => {
+      // Seed the cache so the header can switch to the new deal before the refetch lands.
+      qc.setQueryData<Deal[]>(["deals"], (prev) => [...(prev ?? []), deal]);
       qc.invalidateQueries();
       toast.success(`Deal "${deal.name}" created`);
     },
