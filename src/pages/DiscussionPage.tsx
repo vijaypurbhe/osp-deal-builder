@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MessageSquareWarning, Plus } from "lucide-react";
 
-const STATUSES = ["Open", "In discussion", "Awaiting Salesforce", "Awaiting Smith+Nephew", "Closed"];
+const STATUSES = ["Open", "In discussion", "Awaiting vendor", "Awaiting customer", "Closed"];
 const INCLUSION = ["Include", "Exclude", "Optional", "Undecided"];
 
 export default function DiscussionPage() {
@@ -42,7 +42,7 @@ export default function DiscussionPage() {
         <KpiCard label="Total items" value={String((items ?? []).length)} icon={MessageSquareWarning} />
         <KpiCard label="Open" value={String(openCount)} tone={openCount ? "warning" : "positive"} />
         <KpiCard label="Awaiting Salesforce" value={String((items ?? []).filter((i) => i.status === "Awaiting Salesforce").length)} />
-        <KpiCard label="Awaiting Smith+Nephew" value={String((items ?? []).filter((i) => i.status === "Awaiting Smith+Nephew").length)} />
+        <KpiCard label="Awaiting customer" value={String((items ?? []).filter((i) => i.status === "Awaiting customer").length)} />
       </div>
 
       <SectionCard

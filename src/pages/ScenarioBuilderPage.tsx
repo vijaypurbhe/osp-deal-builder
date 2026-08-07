@@ -257,7 +257,7 @@ export default function ScenarioBuilderPage() {
                   <Switch checked={line.needs_salesforce_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_salesforce_confirmation: v })} /> SFDC
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  <Switch checked={line.needs_sn_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_sn_confirmation: v })} /> S+N
+                  <Switch checked={line.needs_sn_confirmation} disabled={locked} onCheckedChange={(v) => patch(line, { needs_sn_confirmation: v })} /> Customer
                 </label>
               </div>
             </div>

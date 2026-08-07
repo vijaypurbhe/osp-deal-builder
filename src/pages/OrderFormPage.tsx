@@ -74,8 +74,8 @@ export default function OrderFormPage() {
               upsertForm.mutate({
                 scenario_id: scenario.id,
                 form_type: ORDER_FORM_TYPES[0],
-                customer_name: "Smith+Nephew",
-                partner_name: "Tech Mahindra",
+                customer_name: activeDeal?.customer_name ?? "Customer",
+                partner_name: activeDeal?.partner_name ?? "Salesforce",
                 billing_frequency: "Annual",
                 currency: scenario.currency,
                 approval_status: "Draft",

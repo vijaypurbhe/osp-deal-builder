@@ -91,7 +91,7 @@ export default function Dashboard() {
               {[
                 ["SKU lines", number((lines ?? []).length)],
                 ["Awaiting Salesforce confirmation", number(totals.needsSalesforce)],
-                ["Awaiting Smith+Nephew confirmation", number(totals.needsSn)],
+                ["Awaiting customer confirmation", number(totals.needsSn)],
                 ["Incremental / growth SKUs", number(totals.netNewSkus)],
                 ["Rationalised SKUs", number(totals.rationalizedSkus)],
                 ["Pricing warnings", number(totals.warnings)],

@@ -2,20 +2,21 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
 import { useDeal } from "@/context/DealContext";
-import { useScenarios } from "@/hooks/useDealData";
+import { useDeals, useScenarios } from "@/hooks/useDealData";
+import NewDealDialog from "@/components/deals/NewDealDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { LogOut, Menu, UserRound } from "lucide-react";
+import { LogOut, Menu, Plus, UserRound } from "lucide-react";
 
 const ROLE_LABEL: Record<string, string> = {
   deal_architect: "Deal architect",
   salesforce_ae: "Salesforce AE",
   tm_osp_lead: "Tech Mahindra OSP lead",
-  sn_reviewer: "Smith+Nephew reviewer",
+  sn_reviewer: "Customer reviewer",
   finance_reviewer: "Finance reviewer",
 };
 
@@ -52,11 +53,21 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export default function AppShell() {
-  const { profile, roles, signOut, activeScenarioId, setActiveScenarioId } = useDeal();
+  const { profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId, canEdit } = useDeal();
+  const { data: deals } = useDeals();
   const { data: scenarios } = useScenarios();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const [newDeal, setNewDeal] = useState(false);
+  const activeDeal = (deals ?? []).find((d) => d.id === activeDealId) ?? null;
   const current = ALL_NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
+
+  // Default to the first non-archived deal so pages are never blank.
+  useEffect(() => {
+    if (!deals?.length) return;
+    if (activeDealId && deals.some((d) => d.id === activeDealId)) return;
+    setActiveDealId((deals.find((d) => !d.is_archived) ?? deals[0]).id);
+  }, [deals, activeDealId, setActiveDealId]);
 
   // Default to the recommended (or first) scenario so pages are never blank.
   useEffect(() => {
@@ -81,14 +92,34 @@ export default function AppShell() {
           </Sheet>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">S+N</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">OSP</div>
             <div className="leading-tight">
               <p className="font-display text-sm font-semibold">OSP Deal Builder</p>
-              <p className="text-xs text-muted-foreground">Smith+Nephew · Salesforce estate</p>
+              <p className="text-xs text-muted-foreground">
+                {activeDeal ? `${activeDeal.customer_name} · ${activeDeal.partner_name} estate` : "Select a deal to begin"}
+              </p>
             </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
+            <Select value={activeDealId ?? undefined} onValueChange={setActiveDealId}>
+              <SelectTrigger className="hidden w-[220px] md:flex" aria-label="Active deal">
+                <SelectValue placeholder="Select deal" />
+              </SelectTrigger>
+              <SelectContent>
+                {(deals ?? []).map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name}
+                    {d.is_archived ? " (archived)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" size="icon" aria-label="New deal" disabled={!canEdit} onClick={() => setNewDeal(true)}>
+              <Plus className="h-4 w-4" />
+            </Button>
+
             <Select value={activeScenarioId ?? undefined} onValueChange={setActiveScenarioId}>
               <SelectTrigger className="hidden w-[230px] md:flex" aria-label="Active scenario">
                 <SelectValue placeholder="Select scenario" />
@@ -134,6 +165,8 @@ export default function AppShell() {
           </div>
         </div>
       </header>
+
+      <NewDealDialog open={newDeal} onOpenChange={setNewDeal} />
 
       <div className="flex">
         <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:block">

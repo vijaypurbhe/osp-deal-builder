@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Boxes, GitCompareArrows, SlidersHorizontal, Users, Database, Bot, Network, Wrench,
-  Percent, FileSignature, Upload, MessageSquareWarning, ShieldAlert, Settings,
+  Percent, FileSignature, Upload, MessageSquareWarning, ShieldAlert, Settings, Briefcase, Library,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -21,7 +21,9 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Overview",
     items: [
       { label: "Executive dashboard", to: "/", icon: LayoutDashboard, description: "Deal value, coverage and approval posture" },
-      { label: "SKU catalogue", to: "/catalogue", icon: Boxes, description: "Master list of Salesforce SKUs and price points" },
+      { label: "Deals", to: "/deals", icon: Briefcase, description: "Create, open and manage every OSP deal" },
+      { label: "SKU catalogue", to: "/catalogue", icon: Boxes, description: "SKUs and price points used in this deal" },
+      { label: "SKU library", to: "/sku-library", icon: Library, description: "Reusable master list of Salesforce SKUs" },
     ],
   },
   {
@@ -47,7 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Governance",
     items: [
       { label: "Data import", to: "/import", icon: Upload, description: "Load SKU workbooks and pricing extracts" },
-      { label: "Discussion log", to: "/discussion", icon: MessageSquareWarning, description: "Open questions with Salesforce and S+N" },
+      { label: "Discussion log", to: "/discussion", icon: MessageSquareWarning, description: "Open questions with the customer and vendor" },
       { label: "Risk register", to: "/risks", icon: ShieldAlert, description: "Commercial and delivery exposure" },
       { label: "Settings", to: "/settings", icon: Settings, description: "Profile, roles and deal defaults" },
     ],
