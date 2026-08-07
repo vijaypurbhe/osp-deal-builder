@@ -180,7 +180,30 @@ export default function ScenarioBuilderPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <Dialog open={libraryOpen} onOpenChange={(o) => { setLibraryOpen(o); if (!o) setLibrarySelections([]); }}>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Add SKUs from the library</DialogTitle>
+              </DialogHeader>
+              <LibraryPicker value={librarySelections} onChange={setLibrarySelections} />
+              <DialogFooter>
+                <Button
+                  disabled={!librarySelections.length || addFromLibrary.isPending}
+                  onClick={() =>
+                    addFromLibrary.mutate(librarySelections, {
+                      onSuccess: () => { setLibraryOpen(false); setLibrarySelections([]); },
+                    })
+                  }
+                >
+                  Add {librarySelections.length || ""} line{librarySelections.length === 1 ? "" : "s"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          </div>
         }
+
       >
         <div className="overflow-x-auto">
           <Table>
