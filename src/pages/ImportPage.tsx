@@ -346,15 +346,19 @@ export default function ImportPage() {
         </SectionCard>
       )}
 
-      <Dialog open={dealOpen} onOpenChange={setDealOpen}>
+      <Dialog open={dealOpen} onOpenChange={(o) => { setDealOpen(o); if (!o) setDealStep("details"); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create a deal from this BOM</DialogTitle>
+            <DialogTitle>
+              {dealStep === "details" ? "Create a deal from this BOM" : "Confirm the parsed BOM"}
+            </DialogTitle>
             <DialogDescription>
-              {number(validRows.length)} lines will be loaded into every scenario of the new deal.
+              {dealStep === "details"
+                ? `Step 1 of 2 · ${number(validRows.length)} lines will be loaded into every scenario of the new deal.`
+                : `Step 2 of 2 · review ${number(towerPreview.length)} towers and ${number(validRows.length)} SKU lines before the deal is created.`}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className={dealStep === "details" ? "grid gap-4 md:grid-cols-2" : "hidden"}>
             <div className="space-y-1.5 md:col-span-2">
               <Label>Deal name</Label>
               <Input value={dealForm.name} onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })} />
