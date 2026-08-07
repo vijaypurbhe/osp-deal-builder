@@ -189,6 +189,17 @@ export function useCreateDeal() {
           }
           await insertRows("sku_lines", lines);
         }
+
+        // Starting BOM from an uploaded workbook
+        if (input.source === "import" && input.importLines?.length) {
+          const lines: Record<string, unknown>[] = [];
+          for (const scenarioId of scenarioIds) {
+            for (const line of input.importLines) {
+              lines.push({ ...line, scenario_id: scenarioId, bom_type: "revised", approval_status: "Draft" });
+            }
+          }
+          await insertRows("sku_lines", lines);
+        }
       }
 
       return deal;
