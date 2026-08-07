@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MODEL_DEFAULTS, type ModelKey } from "@/types/deal";
-import type { BulkTier, DiscussionItem, OrderForm, RiskEntry, Scenario, SkuLine, Tower } from "@/types/deal";
+import { useDeal } from "@/context/DealContext";
+import type { BulkTier, Deal, DiscussionItem, OrderForm, RiskEntry, Scenario, SkuLibraryItem, SkuLine, Tower } from "@/types/deal";
 import { toast } from "sonner";
 
 const fail = (e: unknown) => {
@@ -9,11 +10,37 @@ const fail = (e: unknown) => {
   toast.error(message.includes("row-level security") ? "You do not have edit rights for this area." : message);
 };
 
-export function useScenarios() {
+/* ---------- Deals ---------- */
+
+export function useDeals() {
   return useQuery({
-    queryKey: ["scenarios"],
+    queryKey: ["deals"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("scenarios").select("*").order("sort_order");
+      const { data, error } = await supabase.from("deals").select("*").order("sort_order").order("created_at");
+      if (error) throw error;
+      return data as unknown as Deal[];
+    },
+  });
+}
+
+export function useSkuLibrary() {
+  return useQuery({
+    queryKey: ["sku_library"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("sku_library").select("*").order("sku_name");
+      if (error) throw error;
+      return data as unknown as SkuLibraryItem[];
+    },
+  });
+}
+
+export function useScenarios() {
+  const { activeDealId } = useDeal();
+  return useQuery({
+    queryKey: ["scenarios", activeDealId],
+    enabled: !!activeDealId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("scenarios").select("*").eq("deal_id", activeDealId!).order("sort_order");
       if (error) throw error;
       return data as unknown as Scenario[];
     },
@@ -21,10 +48,12 @@ export function useScenarios() {
 }
 
 export function useTowers() {
+  const { activeDealId } = useDeal();
   return useQuery({
-    queryKey: ["towers"],
+    queryKey: ["towers", activeDealId],
+    enabled: !!activeDealId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("towers").select("*").order("sort_order");
+      const { data, error } = await supabase.from("towers").select("*").eq("deal_id", activeDealId!).order("sort_order");
       if (error) throw error;
       return data as unknown as Tower[];
     },
@@ -43,11 +72,21 @@ export function useSkuLines(scenarioId?: string | null) {
   });
 }
 
+/** Every line across the scenarios of the active deal. */
 export function useAllSkuLines() {
+  const { activeDealId } = useDeal();
   return useQuery({
-    queryKey: ["sku_lines_all"],
+    queryKey: ["sku_lines_all", activeDealId],
+    enabled: !!activeDealId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("sku_lines").select("*");
+      const { data: scenarioRows, error: scenarioError } = await supabase
+        .from("scenarios")
+        .select("id")
+        .eq("deal_id", activeDealId!);
+      if (scenarioError) throw scenarioError;
+      const ids = (scenarioRows ?? []).map((s) => s.id);
+      if (!ids.length) return [] as SkuLine[];
+      const { data, error } = await supabase.from("sku_lines").select("*").in("scenario_id", ids);
       if (error) throw error;
       return data as unknown as SkuLine[];
     },
@@ -55,10 +94,12 @@ export function useAllSkuLines() {
 }
 
 export function useDiscussionItems() {
+  const { activeDealId } = useDeal();
   return useQuery({
-    queryKey: ["discussion_items"],
+    queryKey: ["discussion_items", activeDealId],
+    enabled: !!activeDealId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("discussion_items").select("*").order("area").order("title");
+      const { data, error } = await supabase.from("discussion_items").select("*").eq("deal_id", activeDealId!).order("area").order("title");
       if (error) throw error;
       return data as unknown as DiscussionItem[];
     },
@@ -66,10 +107,12 @@ export function useDiscussionItems() {
 }
 
 export function useRiskLog() {
+  const { activeDealId } = useDeal();
   return useQuery({
-    queryKey: ["risk_log"],
+    queryKey: ["risk_log", activeDealId],
+    enabled: !!activeDealId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("risk_log").select("*").order("ref_code");
+      const { data, error } = await supabase.from("risk_log").select("*").eq("deal_id", activeDealId!).order("ref_code");
       if (error) throw error;
       return data as unknown as RiskEntry[];
     },
@@ -134,7 +177,17 @@ export function useSaveScenarioModel(scenarioId: string | null | undefined, key:
   });
 }
 
-type TableName = "scenarios" | "sku_lines" | "towers" | "discussion_items" | "risk_log" | "order_forms" | "bulk_discount_tiers" | "import_batches";
+type TableName =
+  | "deals"
+  | "sku_library"
+  | "scenarios"
+  | "sku_lines"
+  | "towers"
+  | "discussion_items"
+  | "risk_log"
+  | "order_forms"
+  | "bulk_discount_tiers"
+  | "import_batches";
 
 export function useUpsertRow(table: TableName, invalidate: unknown[][]) {
   const qc = useQueryClient();
