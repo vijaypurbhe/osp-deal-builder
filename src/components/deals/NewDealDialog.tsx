@@ -15,7 +15,7 @@ import { DEAL_STATUSES } from "@/types/deal";
 import { toast } from "sonner";
 
 const SOURCES: { value: NewDealInput["source"]; label: string; hint: string }[] = [
-  { value: "blank", label: "Blank deal", description: "", hint: "Start with empty scenarios and add lines manually" } as never,
+  { value: "blank", label: "Blank deal", hint: "Start with empty scenarios and add lines manually" },
   { value: "library", label: "Pick from the SKU library", hint: "Select Salesforce SKUs and quantities to seed the BOM" },
   { value: "clone", label: "Copy an existing deal", hint: "Clone scenarios, lines, towers, risks and discussion items" },
   { value: "import", label: "Import a workbook", hint: "Create the deal, then land on the import screen" },
