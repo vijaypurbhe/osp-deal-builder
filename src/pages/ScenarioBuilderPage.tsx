@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APPROVAL_STATUSES, BILLING_FREQUENCIES, CLASSIFICATIONS, UNITS_OF_MEASURE, type SkuLine } from "@/types/deal";
-import { AlertTriangle, Lock, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Library, Lock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import LeverInput from "@/components/common/LeverInput";
 
