@@ -69,6 +69,7 @@ export default function ImportPage() {
   const [activeTabs, setActiveTabs] = useState<string[]>([]);
   const [targetScenarioId, setTargetScenarioId] = useState<string>("");
   const [dealOpen, setDealOpen] = useState(false);
+  const [dealStep, setDealStep] = useState<"details" | "preview">("details");
   const [dealForm, setDealForm] = useState({
     name: "",
     customer_name: "",
@@ -88,6 +89,20 @@ export default function ImportPage() {
     () => validRows.reduce((sum, r) => sum + r.quantity * r.unit_list_price, 0),
     [validRows],
   );
+
+  /** Grouped preview of the towers and lines that the new deal will be seeded with. */
+  const towerPreview = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; lines: ParsedRow[]; value: number }>();
+    for (const r of validRows) {
+      const key = r.tower_key ?? "core";
+      const name = DEFAULT_TOWER_SEED.find((t) => t.key === key)?.name ?? key;
+      const entry = map.get(key) ?? { key, name, lines: [], value: 0 };
+      entry.lines.push(r);
+      entry.value += r.quantity * r.unit_list_price;
+      map.set(key, entry);
+    }
+    return [...map.values()].sort((a, b) => b.value - a.value);
+  }, [validRows]);
 
   const parseSheet = (sheet: XLSX.WorkSheet, tab: string, file: string): ParsedRow[] => {
     const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
