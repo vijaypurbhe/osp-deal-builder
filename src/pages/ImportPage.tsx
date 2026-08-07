@@ -56,7 +56,7 @@ const classificationFor = (label: string) => {
 };
 
 export default function ImportPage() {
-  const { activeScenarioId, activeDealId, canEdit, profile } = useDeal();
+  const { activeScenarioId, activeDealId, canEdit, profile, setActiveDealId } = useDeal();
   const { data: scenarios } = useScenarios();
   const { data: lines } = useSkuLines(activeScenarioId);
   const insert = useInsertRows("sku_lines", [["sku_lines", activeScenarioId], ["sku_lines_all"]]);
@@ -188,7 +188,8 @@ export default function ImportPage() {
         scenarioPreset: dealForm.preset,
       },
       {
-        onSuccess: () => {
+        onSuccess: (deal) => {
+          setActiveDealId(deal.id);
           setDealOpen(false);
           setRows([]);
           setTabs([]);
