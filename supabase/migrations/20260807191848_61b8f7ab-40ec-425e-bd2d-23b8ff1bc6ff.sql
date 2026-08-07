@@ -1,0 +1,1 @@
+DELETE FROM public.deals WHERE name = 'bom' AND customer_name LIKE 'Acme Corporation%';
