@@ -51,6 +51,7 @@ const line = (over: Partial<SkuLine> = {}): SkuLine =>
     notes: null,
     source_tab: null,
     source_file: null,
+    ...over,
   }) as unknown as SkuLine;
 
 const scenario = (over: Partial<Scenario> = {}): Scenario =>
