@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { useDeal } from "@/context/DealContext";
 import { useDealEconomics } from "@/hooks/useDealEconomics";
-import { useMarketplaceModels, useSaveCommercialRow } from "@/hooks/useCommercial";
+import { useCustomers, useMarketplaceModels, useSaveCommercialRow } from "@/hooks/useCommercial";
+import { marketplaceRecommendations, type MarketplaceRecommendation } from "@/lib/economics";
 import SectionCard from "@/components/common/SectionCard";
 import KpiCard from "@/components/common/KpiCard";
 import { Button } from "@/components/ui/button";
@@ -12,20 +14,75 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { currency, percent } from "@/lib/format";
 import { MARKETPLACE_ELIGIBILITY, MARKETPLACE_PROVIDERS, MARKETPLACE_ROUTES } from "@/types/deal";
-import { CloudCog, Plus } from "lucide-react";
+import { CheckCircle2, CloudCog, Plus, Sparkles, TriangleAlert, XCircle } from "lucide-react";
+
+const checkIcon = {
+  pass: CheckCircle2,
+  warn: TriangleAlert,
+  fail: XCircle,
+} as const;
+
+const checkTone = {
+  pass: "text-secondary",
+  warn: "text-amber-600 dark:text-amber-400",
+  fail: "text-destructive",
+} as const;
+
+const eligibilityVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  Eligible: "secondary",
+  Pending: "outline",
+  "Not eligible": "destructive",
+  "Not applicable": "outline",
+};
 
 export default function MarketplacePage() {
   const { canEdit } = useDeal();
   const view = useDealEconomics();
   const { data: models } = useMarketplaceModels();
+  const { data: customers } = useCustomers();
   const save = useSaveCommercialRow("marketplace_models", [["marketplace_models"], ["portfolio"]], "Marketplace model saved");
 
-  if (!view) return <p className="text-sm text-muted-foreground">Open a deal to run the Cloud Marketplace Optimizer.</p>;
+  const deal = view?.deal ?? null;
+  const customer = useMemo(
+    () => (customers ?? []).find((c) => c.id === deal?.customer_id) ?? null,
+    [customers, deal?.customer_id],
+  );
 
-  const { deal, economics: e } = view;
+  const recommendations = useMemo<MarketplaceRecommendation[]>(() => {
+    if (!view) return [];
+    return marketplaceRecommendations({
+      licenseTermValue: view.economics.license.netTermValue,
+      customer,
+      models: models ?? [],
+      partnerName: view.deal.partner_name,
+    });
+  }, [view, customer, models]);
+
+  if (!view || !deal) return <p className="text-sm text-muted-foreground">Open a deal to run the Cloud Marketplace Optimizer.</p>;
+
+  const { economics: e } = view;
   const cur = deal.currency;
   const rows = models ?? [];
   const active = rows.find((m) => m.is_enabled) ?? rows[0] ?? null;
+  const best = recommendations.find((r) => r.recommendedRoutePct > 0 && r.eligibility !== "Not eligible") ?? null;
+
+  const applyRecommendation = (r: MarketplaceRecommendation) => {
+    const existing = rows.find((m) => m.provider === r.provider);
+    save.mutate({
+      ...(existing ?? {}),
+      deal_id: deal.id,
+      provider: r.provider,
+      route: r.recommendedRoute,
+      is_enabled: true,
+      commitment_total: r.commitment,
+      commitment_remaining: existing ? existing.commitment_remaining : r.commitment,
+      drawdown_pct: r.recommendedRoutePct,
+      marketplace_fee_pct: r.recommendedFeePct,
+      cppo: r.recommendCppo,
+      eligibility_status: r.eligibility === "Not applicable" ? "Pending" : r.eligibility,
+    });
+  };
+
 
   return (
     <div className="space-y-6">
