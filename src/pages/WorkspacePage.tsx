@@ -125,15 +125,13 @@ export default function WorkspacePage() {
     <div className="space-y-6">
       {/* Page header */}
       <div className="overflow-hidden rounded-xl border border-border bg-surface">
-        <div className="flex flex-wrap items-end justify-between gap-4 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-5">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
               Tech Mahindra · Salesforce OSP
             </p>
-            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">OSP Deal Workspace</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Every Tech Mahindra Salesforce OSP transaction — live opportunities and internal simulations, with
-              licence, services and marketplace economics in one place.
+              Live opportunities and internal simulations, with licence, services and marketplace economics in one place.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
