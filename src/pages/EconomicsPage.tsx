@@ -31,7 +31,7 @@ export default function EconomicsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6">
         <KpiCard label="Net licence ARR" value={currency(e.license.netArr, cur)} hint={`${currency(e.license.netTermValue, cur)} over term`} />
         <KpiCard label="Salesforce acquisition cost" value={currency(e.license.acquisitionArr, cur)} hint="Annualised buy price" />
         <KpiCard label="Licence GP" value={currency(e.license.licenseGp, cur)} tone="positive" hint={`${currency(e.license.licenseGpTerm, cur)} over term`} />
