@@ -107,9 +107,27 @@ export default function WorkspacePage() {
         <KpiCard label="Closing this quarter" value={String(t?.closingThisQuarter ?? 0)} icon={Timer} />
       </div>
 
-      <SectionCard title="Deal portfolio" description="Search, filter and open any customer transaction">
+      <SectionCard
+        title="Deal portfolio"
+        description="Search, filter and open any customer transaction"
+        actions={
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="whitespace-nowrap">
+              {rows.length} of {data?.summaries?.length ?? 0} deals
+            </Badge>
+            {activeFilters > 0 && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>Clear filters</Button>
+            )}
+          </div>
+        }
+      >
         <div className="mb-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-          <Input placeholder="Search customer, deal, opportunity, AE or owner" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            className="sm:col-span-2 xl:col-span-2"
+            placeholder="Search customer, deal, opportunity, AE or owner"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           <Select value={industry} onValueChange={setIndustry}>
             <SelectTrigger><SelectValue placeholder="Industry" /></SelectTrigger>
             <SelectContent>
