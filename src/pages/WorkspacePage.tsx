@@ -64,16 +64,26 @@ export default function WorkspacePage() {
     navigate("/deal");
   };
 
+  const activeFilters = [
+    industry !== ANY, region !== ANY, stage !== ANY, dealType !== ANY,
+    Boolean(minTcv), Boolean(minGm), marketplaceOnly !== ANY, fundOnly !== ANY, Boolean(search.trim()),
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setSearch(""); setIndustry(ANY); setRegion(ANY); setStage(ANY); setDealType(ANY);
+    setMinTcv(""); setMinGm(""); setMarketplaceOnly(ANY); setFundOnly(ANY);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">OSP Deal Workspace</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">OSP Deal Workspace</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Every Tech Mahindra Salesforce OSP transaction — live opportunities and internal simulations.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" disabled={!canEdit} onClick={() => setDialog({ open: true, simulation: true })}>
             <FlaskConical className="mr-1.5 h-4 w-4" /> New deal simulation
           </Button>
@@ -83,17 +93,17 @@ export default function WorkspacePage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         <KpiCard label="Active deals" value={String(t?.activeDeals ?? 0)} icon={Briefcase} hint={`${t?.deals ?? 0} total`} />
-        <KpiCard label="Deals in simulation" value={String(t?.simulations ?? 0)} icon={FlaskConical} />
+        <KpiCard label="In simulation" value={String(t?.simulations ?? 0)} icon={FlaskConical} />
         <KpiCard label="Licence TCV" value={compactCurrency(t?.licenseTcv ?? 0)} icon={TrendingUp} hint="3-year net" />
         <KpiCard label="Services TCV" value={compactCurrency(t?.servicesTcv ?? 0)} icon={Wallet} />
         <KpiCard label="Pipeline TCV" value={compactCurrency(t?.combinedTcv ?? 0)} icon={Gauge} hint={`${compactCurrency(t?.weightedTcv ?? 0)} weighted`} />
         <KpiCard label="Expected TechM GP" value={compactCurrency(t?.blendedGp ?? 0)} icon={Percent} hint={percent(t?.blendedGmPct ?? 0)} tone="positive" />
         <KpiCard label="Below margin floor" value={String(t?.belowFloor ?? 0)} icon={AlertTriangle} tone={(t?.belowFloor ?? 0) > 0 ? "critical" : "default"} />
-        <KpiCard label="Awaiting Salesforce validation" value={String(t?.awaitingValidation ?? 0)} icon={ShieldCheck} tone={(t?.awaitingValidation ?? 0) > 0 ? "warning" : "default"} />
-        <KpiCard label="Using Innovation Fund" value={String(t?.usingFund ?? 0)} icon={Landmark} hint={compactCurrency(t?.fundProposed ?? 0)} />
-        <KpiCard label="Using cloud marketplace" value={String(t?.usingMarketplace ?? 0)} icon={CloudCog} />
+        <KpiCard label="Awaiting validation" value={String(t?.awaitingValidation ?? 0)} icon={ShieldCheck} hint="Salesforce review" tone={(t?.awaitingValidation ?? 0) > 0 ? "warning" : "default"} />
+        <KpiCard label="Innovation Fund" value={String(t?.usingFund ?? 0)} icon={Landmark} hint={`${compactCurrency(t?.fundProposed ?? 0)} proposed`} />
+        <KpiCard label="Cloud marketplace" value={String(t?.usingMarketplace ?? 0)} icon={CloudCog} hint="Routed deals" />
         <KpiCard label="Closing this quarter" value={String(t?.closingThisQuarter ?? 0)} icon={Timer} />
       </div>
 
