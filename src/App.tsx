@@ -11,6 +11,16 @@ import Login from "@/pages/Login";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
+import WorkspacePage from "@/pages/WorkspacePage";
+import CustomersPage from "@/pages/CustomersPage";
+import PortfolioAnalyticsPage from "@/pages/PortfolioAnalyticsPage";
+import PartnerViewPage from "@/pages/PartnerViewPage";
+import BenchmarksPage from "@/pages/BenchmarksPage";
+import EconomicsPage from "@/pages/EconomicsPage";
+import InnovationFundPage from "@/pages/InnovationFundPage";
+import MarketplacePage from "@/pages/MarketplacePage";
+import DisplacementPage from "@/pages/DisplacementPage";
+import ValidationPage from "@/pages/ValidationPage";
 import CataloguePage from "@/pages/CataloguePage";
 import DealsPage from "@/pages/DealsPage";
 import SkuLibraryPage from "@/pages/SkuLibraryPage";
@@ -27,6 +37,7 @@ import ImportPage from "@/pages/ImportPage";
 import DiscussionPage from "@/pages/DiscussionPage";
 import RiskPage from "@/pages/RiskPage";
 import SettingsPage from "@/pages/SettingsPage";
+
 
 const queryClient = new QueryClient();
 

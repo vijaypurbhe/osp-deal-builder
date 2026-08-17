@@ -70,9 +70,54 @@ export interface ImportedLine {
   source_file: string | null;
 }
 
+/** What is copied when a deal is created from an existing deal. */
+export interface CloneOptions {
+  commercialStructure: boolean;
+  marginAssumptions: boolean;
+  servicesModel: boolean;
+  innovationFund: boolean;
+  marketplaceModel: boolean;
+  customerPrices: boolean;
+  quantities: boolean;
+  customerSkus: boolean;
+  customerValidation: boolean;
+}
+
+export const DEFAULT_CLONE_OPTIONS: CloneOptions = {
+  commercialStructure: true,
+  marginAssumptions: true,
+  servicesModel: true,
+  innovationFund: true,
+  marketplaceModel: false,
+  customerPrices: false,
+  quantities: false,
+  customerSkus: false,
+  customerValidation: false,
+};
+
 export interface NewDealInput {
   name: string;
   customer_name: string;
+  customer_id?: string | null;
+  industry?: string | null;
+  region?: string | null;
+  opportunity_id?: string | null;
+  deal_type?: string;
+  stage?: string;
+  close_date?: string | null;
+  contract_years?: number;
+  salesforce_ae?: string | null;
+  techm_account_lead?: string | null;
+  techm_osp_lead?: string | null;
+  finance_owner?: string | null;
+  current_salesforce_acv?: number;
+  renewal_uplift_pct?: number;
+  min_license_gm_pct?: number;
+  services_gm_target_pct?: number;
+  /** Annual managed-services fee assumption; creates the services construct when > 0. */
+  services_annual_fee?: number;
+  is_simulation?: boolean;
+  cloneOptions?: CloneOptions;
   partner_name: string;
   currency: string;
   contract_start: string | null;
@@ -121,6 +166,23 @@ export function useCreateDeal() {
           status: input.status,
           owner_name: input.owner_name,
           notes: input.notes,
+          customer_id: input.customer_id ?? null,
+          opportunity_id: input.opportunity_id ?? null,
+          deal_type: input.deal_type ?? "Renewal + Growth",
+          stage: input.stage ?? (input.is_simulation ? "Simulation" : "Qualification"),
+          region: input.region ?? null,
+          contract_years: input.contract_years ?? 3,
+          close_date: input.close_date ?? null,
+          salesforce_ae: input.salesforce_ae ?? null,
+          techm_account_lead: input.techm_account_lead ?? null,
+          techm_osp_lead: input.techm_osp_lead ?? null,
+          finance_owner: input.finance_owner ?? null,
+          source_deal_id: input.sourceDealId ?? null,
+          is_simulation: input.is_simulation ?? false,
+          current_salesforce_acv: input.current_salesforce_acv ?? 0,
+          renewal_uplift_pct: input.renewal_uplift_pct ?? 5,
+          min_license_gm_pct: input.min_license_gm_pct ?? 5,
+          services_gm_target_pct: input.services_gm_target_pct ?? 25,
           owner_id: (await supabase.auth.getUser()).data.user?.id ?? null,
         })
         .select()
@@ -128,8 +190,42 @@ export function useCreateDeal() {
       if (dealError) throw dealError;
       const deal = dealRow as unknown as Deal;
 
+      // Reusable customer record: reuse the selected one, otherwise create it.
+      if (!input.customer_id) {
+        const { data: customerRow } = await supabase
+          .from("customers")
+          .insert({
+            name: input.customer_name,
+            industry: input.industry ?? null,
+            region: input.region ?? null,
+            currency: input.currency,
+            current_salesforce_acv: input.current_salesforce_acv ?? 0,
+            is_simulation: input.is_simulation ?? false,
+          })
+          .select("id")
+          .maybeSingle();
+        const customerId = (customerRow as { id: string } | null)?.id ?? null;
+        if (customerId) {
+          await supabase.from("deals").update({ customer_id: customerId }).eq("id", deal.id);
+          deal.customer_id = customerId;
+        }
+      }
+
+      const servicesFee = Number(input.services_annual_fee) || 0;
+      if (servicesFee > 0) {
+        const margin = (Number(input.services_gm_target_pct) || 25) / 100;
+        await supabase.from("services_constructs").insert({
+          deal_id: deal.id,
+          name: "Managed services & implementation",
+          annual_fee: servicesFee,
+          annual_cost: servicesFee * (1 - margin),
+          years: input.contract_years ?? 3,
+          attach_target_pct: Number(input.services_gm_target_pct) || 25,
+        });
+      }
+
       if (input.source === "clone" && input.sourceDealId) {
-        await cloneDealContents(input.sourceDealId, deal);
+        await cloneDealContents(input.sourceDealId, deal, input.cloneOptions ?? DEFAULT_CLONE_OPTIONS);
       } else {
         // Towers
         await insertRows(
@@ -223,7 +319,8 @@ export function useCreateDeal() {
 }
 
 /** Copies scenarios, lines, tiers, models, order forms, towers, discussion and risks into a new deal. */
-async function cloneDealContents(sourceDealId: string, deal: Deal) {
+async function cloneDealContents(sourceDealId: string, deal: Deal, options: CloneOptions) {
+  await cloneCommercialModules(sourceDealId, deal, options);
   const [towers, scenarios, discussion, risks] = await Promise.all([
     supabase.from("towers").select("*").eq("deal_id", sourceDealId),
     supabase.from("scenarios").select("*").eq("deal_id", sourceDealId).order("sort_order"),
@@ -275,6 +372,27 @@ async function cloneDealContents(sourceDealId: string, deal: Deal) {
   ]);
   for (const r of [lines, tiers, models, forms]) if (r.error) throw r.error;
 
+  const resetLine = (row: Record<string, unknown>) => {
+    if (!options.customerPrices) {
+      row.unit_list_price = row.unit_list_price;
+      row.acquisition_unit_price = 0;
+      row.current_contract_unit_price = 0;
+      row.line_discount_pct = 0;
+      row.category_discount_pct = 0;
+      row.discount_reason = null;
+    }
+    if (!options.quantities) {
+      row.quantity = 0;
+      row.year1_qty = null;
+      row.year2_qty = null;
+      row.year3_qty = null;
+    }
+    row.approval_status = "Draft";
+    row.needs_salesforce_confirmation = false;
+    row.needs_sn_confirmation = false;
+    return row;
+  };
+
   const remap = (rows: unknown[] | null) =>
     (rows ?? [])
       .map((row) => {
@@ -285,13 +403,38 @@ async function cloneDealContents(sourceDealId: string, deal: Deal) {
       })
       .filter(Boolean) as Record<string, unknown>[];
 
-  await insertRows("sku_lines", remap(lines.data));
+  const clonedLines = remap(lines.data)
+    // "Customer-specific SKUs" are the incumbent estate lines carried from the source deal.
+    .filter((row) => options.customerSkus || row.bom_type !== "current")
+    .map(resetLine);
+  await insertRows("sku_lines", clonedLines);
   await insertRows("bulk_discount_tiers", remap(tiers.data));
   await insertRows("scenario_models", remap(models.data));
   await insertRows(
     "order_forms",
     remap(forms.data).map((f) => ({ ...f, customer_name: deal.customer_name, partner_name: deal.partner_name })),
   );
+}
+
+/** Copies the commercial construct modules (services, fund, marketplace, displacement, value). */
+async function cloneCommercialModules(sourceDealId: string, deal: Deal, options: CloneOptions) {
+  const copy = async (table: string, when: boolean, transform?: (row: Record<string, unknown>) => Record<string, unknown>) => {
+    if (!when) return;
+    const { data, error } = await supabase.from(table as never).select("*").eq("deal_id", sourceDealId);
+    if (error) throw error;
+    const rows = (data ?? []).map((row) => {
+      const rest = { ...strip(row as never), deal_id: deal.id } as Record<string, unknown>;
+      return transform ? transform(rest) : rest;
+    });
+    await insertRows(table, rows);
+  };
+
+  await copy("services_constructs", options.servicesModel);
+  await copy("innovation_funds", options.innovationFund, (row) => ({ ...row, consumed: 0, status: "Proposed" }));
+  await copy("marketplace_models", options.marketplaceModel, (row) => ({ ...row, commitment_remaining: row.commitment_total, eligibility_status: "Pending" }));
+  await copy("incumbent_platforms", options.commercialStructure, (row) => ({ ...row, status: "Identified" }));
+  await copy("value_levers", options.commercialStructure);
+  await copy("validation_items", options.customerValidation, (row) => ({ ...row, status: "Open", resolution: null }));
 }
 
 /** Duplicate an existing deal in place (used from the deals list). */
@@ -311,13 +454,40 @@ export function useDuplicateDeal() {
           status: "Shaping",
           owner_name: source.owner_name,
           notes: source.notes,
+          customer_id: source.customer_id,
+          deal_type: source.deal_type,
+          stage: source.is_simulation ? "Simulation" : "Qualification",
+          region: source.region,
+          contract_years: source.contract_years,
+          close_date: source.close_date,
+          salesforce_ae: source.salesforce_ae,
+          techm_account_lead: source.techm_account_lead,
+          techm_osp_lead: source.techm_osp_lead,
+          finance_owner: source.finance_owner,
+          source_deal_id: source.id,
+          is_simulation: source.is_simulation,
+          current_salesforce_acv: source.current_salesforce_acv,
+          renewal_uplift_pct: source.renewal_uplift_pct,
+          min_license_gm_pct: source.min_license_gm_pct,
+          services_gm_target_pct: source.services_gm_target_pct,
           owner_id: (await supabase.auth.getUser()).data.user?.id ?? null,
         })
         .select()
         .single();
       if (error) throw error;
       const deal = data as unknown as Deal;
-      await cloneDealContents(source.id, deal);
+      // A duplicate is a full copy — every module, price and quantity comes across.
+      await cloneDealContents(source.id, deal, {
+        commercialStructure: true,
+        marginAssumptions: true,
+        servicesModel: true,
+        innovationFund: true,
+        marketplaceModel: true,
+        customerPrices: true,
+        quantities: true,
+        customerSkus: true,
+        customerValidation: true,
+      });
       return deal;
     },
     onSuccess: (deal) => {
