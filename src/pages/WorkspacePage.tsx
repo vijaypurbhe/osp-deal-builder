@@ -179,9 +179,9 @@ export default function WorkspacePage() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading portfolio…</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border border-border">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-muted/60 [&_th]:h-10 [&_th]:whitespace-nowrap [&_th]:text-xs [&_th]:font-semibold">
                 <TableRow>
                   <TableHead className="min-w-[200px]">Customer / deal</TableHead>
                   <TableHead>Opportunity</TableHead>
