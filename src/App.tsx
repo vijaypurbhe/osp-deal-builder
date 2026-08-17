@@ -58,7 +58,17 @@ const App = () => (
                 </RequireAuth>
               }
             >
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<WorkspacePage />} />
+              <Route path="/customers" element={<CustomersPage />} />
+              <Route path="/deal" element={<Dashboard />} />
+              <Route path="/economics" element={<EconomicsPage />} />
+              <Route path="/innovation-fund" element={<InnovationFundPage />} />
+              <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/displacement" element={<DisplacementPage />} />
+              <Route path="/validation" element={<ValidationPage />} />
+              <Route path="/portfolio" element={<PortfolioAnalyticsPage />} />
+              <Route path="/benchmarks" element={<BenchmarksPage />} />
+              <Route path="/partner" element={<PartnerViewPage />} />
               <Route path="/deals" element={<DealsPage />} />
               <Route path="/catalogue" element={<CataloguePage />} />
               <Route path="/sku-library" element={<SkuLibraryPage />} />
