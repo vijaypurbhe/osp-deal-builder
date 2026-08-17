@@ -229,6 +229,173 @@ export function marketplaceMath(model: MarketplaceModel | null | undefined, lice
   };
 }
 
+/* ---------- Cloud Marketplace Optimizer: eligibility + recommendations ---------- */
+
+export type MarketplaceProvider = "AWS" | "Azure" | "GCP";
+export type CheckStatus = "pass" | "warn" | "fail";
+
+export interface MarketplaceCheck {
+  label: string;
+  status: CheckStatus;
+  detail: string;
+}
+
+export interface MarketplaceRecommendation {
+  provider: MarketplaceProvider;
+  commitment: number;
+  /** Provider maturity of the marketplace motion on the platform. */
+  supported: boolean;
+  eligibility: "Eligible" | "Pending" | "Not eligible" | "Not applicable";
+  checks: MarketplaceCheck[];
+  recommendedRoute: string;
+  recommendedRoutePct: number;
+  recommendedFeePct: number;
+  recommendCppo: boolean;
+  routedTermValue: number;
+  fee: number;
+  netToSalesforce: number;
+  commitmentDrawdown: number;
+  commitmentAfter: number;
+  coversRouted: boolean;
+  /** Predicted incremental licence TCV unlocked by transacting on the marketplace. */
+  incrementalTermValue: number;
+  incrementalAcv: number;
+  /** Incremental TCV net of the marketplace listing fee. */
+  netIncrementalTermValue: number;
+  upliftPct: number;
+  confidence: "High" | "Medium" | "Low";
+  rationale: string;
+  isConfigured: boolean;
+  isActive: boolean;
+}
+
+/** Committed-spend drawdown converts pre-approved cloud budget into licence spend. */
+const MARKETPLACE_UPLIFT: Record<MarketplaceProvider, number> = { AWS: 12, Azure: 9, GCP: 7 };
+const MARKETPLACE_DEFAULT_FEE: Record<MarketplaceProvider, number> = { AWS: 3, Azure: 3, GCP: 3 };
+/** Share of licence TCV that is realistically routable through committed spend. */
+const MARKETPLACE_TARGET_ROUTE_PCT = 100;
+
+export interface MarketplaceOptimizerInput {
+  licenseTermValue: number;
+  customer?: {
+    aws_customer?: boolean;
+    aws_commitment?: number;
+    azure_commitment?: number;
+    gcp_commitment?: number;
+    strategic_platforms?: string[];
+  } | null;
+  models?: MarketplaceModel[];
+  /** Partner (TechM) is on the private-offer paper — enables CPPO recommendation. */
+  partnerName?: string | null;
+}
+
+function providerCommitment(provider: MarketplaceProvider, c: MarketplaceOptimizerInput["customer"]): number {
+  if (!c) return 0;
+  if (provider === "AWS") return Number(c.aws_commitment) || 0;
+  if (provider === "Azure") return Number(c.azure_commitment) || 0;
+  return Number(c.gcp_commitment) || 0;
+}
+
+/**
+ * Ranks every cloud provider for the active deal: runs eligibility checks against
+ * the customer's committed spend and predicts the incremental licence revenue a
+ * marketplace private offer would unlock.
+ */
+export function marketplaceRecommendations(input: MarketplaceOptimizerInput): MarketplaceRecommendation[] {
+  const licenseTermValue = Math.max(0, Number(input.licenseTermValue) || 0);
+  const providers: MarketplaceProvider[] = ["AWS", "Azure", "GCP"];
+
+  const recs = providers.map<MarketplaceRecommendation>((provider) => {
+    const model = (input.models ?? []).find((m) => m.provider === provider) ?? null;
+    const commitment = providerCommitment(provider, input.customer) || Number(model?.commitment_total) || 0;
+    const remaining = Number(model?.commitment_remaining) || commitment;
+    const strategic = (input.customer?.strategic_platforms ?? []).some((p) => p.toLowerCase().includes(provider.toLowerCase()));
+    const isCloudCustomer = provider === "AWS" ? !!input.customer?.aws_customer || commitment > 0 : commitment > 0;
+
+    const checks: MarketplaceCheck[] = [
+      {
+        label: `${provider} customer relationship`,
+        status: isCloudCustomer ? "pass" : strategic ? "warn" : "fail",
+        detail: isCloudCustomer
+          ? `Active ${provider} spend on record`
+          : strategic
+            ? `${provider} listed as a strategic platform but no commitment captured`
+            : `No ${provider} relationship captured on the customer profile`,
+      },
+      {
+        label: "Committed spend available",
+        status: remaining > 0 ? (remaining >= licenseTermValue ? "pass" : "warn") : "fail",
+        detail: remaining > 0
+          ? `${remaining >= licenseTermValue ? "Covers" : "Partially covers"} the licence TCV in scope`
+          : "No remaining commitment to draw down against",
+      },
+      {
+        label: "Licence TCV in scope",
+        status: licenseTermValue > 0 ? "pass" : "fail",
+        detail: licenseTermValue > 0 ? "Priced licence BOM available to route" : "Price the licence BOM before routing",
+      },
+      {
+        label: "Private offer paper",
+        status: input.partnerName ? "pass" : "warn",
+        detail: input.partnerName ? `${input.partnerName} can transact the private offer (CPPO)` : "Confirm which entity issues the private offer",
+      },
+    ];
+
+    const failed = checks.filter((c) => c.status === "fail").length;
+    const warned = checks.filter((c) => c.status === "warn").length;
+    const eligibility: MarketplaceRecommendation["eligibility"] =
+      failed > 1 ? "Not eligible" : failed === 1 ? "Pending" : warned ? "Pending" : "Eligible";
+
+    const routePct = remaining > 0 && licenseTermValue > 0
+      ? Math.min(MARKETPLACE_TARGET_ROUTE_PCT, Math.round((Math.min(remaining, licenseTermValue) / licenseTermValue) * 100))
+      : 0;
+    const feePct = Number(model?.marketplace_fee_pct) || MARKETPLACE_DEFAULT_FEE[provider];
+    const recommendCppo = !!input.partnerName;
+    const recommendedRoute = routePct === 0
+      ? "Direct (no marketplace)"
+      : recommendCppo
+        ? "Marketplace private offer (CPPO)"
+        : "Marketplace private offer";
+
+    const routed = licenseTermValue * pct(routePct);
+    const fee = routed * pct(feePct);
+    const drawdown = Math.min(routed, remaining);
+    const upliftPct = MARKETPLACE_UPLIFT[provider];
+    const incrementalTermValue = eligibility === "Not eligible" ? 0 : drawdown * pct(upliftPct);
+
+    return {
+      provider,
+      commitment,
+      supported: provider === "AWS",
+      eligibility: licenseTermValue === 0 && commitment === 0 ? "Not applicable" : eligibility,
+      checks,
+      recommendedRoute,
+      recommendedRoutePct: routePct,
+      recommendedFeePct: feePct,
+      recommendCppo,
+      routedTermValue: routed,
+      fee,
+      netToSalesforce: routed - fee,
+      commitmentDrawdown: drawdown,
+      commitmentAfter: Math.max(0, remaining - drawdown),
+      coversRouted: remaining >= routed,
+      incrementalTermValue,
+      incrementalAcv: incrementalTermValue / TERM_YEARS,
+      netIncrementalTermValue: incrementalTermValue - fee,
+      upliftPct,
+      confidence: failed ? "Low" : warned ? "Medium" : "High",
+      rationale: routePct > 0
+        ? `Route ${routePct}% of licence TCV through ${provider} committed spend; drawdown converts pre-approved cloud budget, historically unlocking ~${upliftPct}% incremental licence scope.`
+        : `Insufficient ${provider} committed spend to justify a marketplace route — transact direct.`,
+      isConfigured: !!model,
+      isActive: !!model?.is_enabled,
+    };
+  });
+
+  return recs.sort((a, b) => b.netIncrementalTermValue - a.netIncrementalTermValue || b.routedTermValue - a.routedTermValue);
+}
+
+
 export interface DealEconomics {
   scenario?: Scenario;
   totals: ReturnType<typeof computeScenario>;

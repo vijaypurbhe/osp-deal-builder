@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { useDeal } from "@/context/DealContext";
 import { useDealEconomics } from "@/hooks/useDealEconomics";
-import { useMarketplaceModels, useSaveCommercialRow } from "@/hooks/useCommercial";
+import { useCustomers, useMarketplaceModels, useSaveCommercialRow } from "@/hooks/useCommercial";
+import { marketplaceRecommendations, type MarketplaceRecommendation } from "@/lib/economics";
 import SectionCard from "@/components/common/SectionCard";
 import KpiCard from "@/components/common/KpiCard";
 import { Button } from "@/components/ui/button";
@@ -12,20 +14,75 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { currency, percent } from "@/lib/format";
 import { MARKETPLACE_ELIGIBILITY, MARKETPLACE_PROVIDERS, MARKETPLACE_ROUTES } from "@/types/deal";
-import { CloudCog, Plus } from "lucide-react";
+import { CheckCircle2, CloudCog, Plus, Sparkles, TriangleAlert, XCircle } from "lucide-react";
+
+const checkIcon = {
+  pass: CheckCircle2,
+  warn: TriangleAlert,
+  fail: XCircle,
+} as const;
+
+const checkTone = {
+  pass: "text-secondary",
+  warn: "text-amber-600 dark:text-amber-400",
+  fail: "text-destructive",
+} as const;
+
+const eligibilityVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  Eligible: "secondary",
+  Pending: "outline",
+  "Not eligible": "destructive",
+  "Not applicable": "outline",
+};
 
 export default function MarketplacePage() {
   const { canEdit } = useDeal();
   const view = useDealEconomics();
   const { data: models } = useMarketplaceModels();
+  const { data: customers } = useCustomers();
   const save = useSaveCommercialRow("marketplace_models", [["marketplace_models"], ["portfolio"]], "Marketplace model saved");
 
-  if (!view) return <p className="text-sm text-muted-foreground">Open a deal to run the Cloud Marketplace Optimizer.</p>;
+  const deal = view?.deal ?? null;
+  const customer = useMemo(
+    () => (customers ?? []).find((c) => c.id === deal?.customer_id) ?? null,
+    [customers, deal?.customer_id],
+  );
 
-  const { deal, economics: e } = view;
+  const recommendations = useMemo<MarketplaceRecommendation[]>(() => {
+    if (!view) return [];
+    return marketplaceRecommendations({
+      licenseTermValue: view.economics.license.netTermValue,
+      customer,
+      models: models ?? [],
+      partnerName: view.deal.partner_name,
+    });
+  }, [view, customer, models]);
+
+  if (!view || !deal) return <p className="text-sm text-muted-foreground">Open a deal to run the Cloud Marketplace Optimizer.</p>;
+
+  const { economics: e } = view;
   const cur = deal.currency;
   const rows = models ?? [];
   const active = rows.find((m) => m.is_enabled) ?? rows[0] ?? null;
+  const best = recommendations.find((r) => r.recommendedRoutePct > 0 && r.eligibility !== "Not eligible") ?? null;
+
+  const applyRecommendation = (r: MarketplaceRecommendation) => {
+    const existing = rows.find((m) => m.provider === r.provider);
+    save.mutate({
+      ...(existing ?? {}),
+      deal_id: deal.id,
+      provider: r.provider,
+      route: r.recommendedRoute,
+      is_enabled: true,
+      commitment_total: r.commitment,
+      commitment_remaining: existing ? existing.commitment_remaining : r.commitment,
+      drawdown_pct: r.recommendedRoutePct,
+      marketplace_fee_pct: r.recommendedFeePct,
+      cppo: r.recommendCppo,
+      eligibility_status: r.eligibility === "Not applicable" ? "Pending" : r.eligibility,
+    });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -39,6 +96,98 @@ export default function MarketplacePage() {
           tone={e.marketplace.routedTermValue > 0 && !e.marketplace.coversRouted ? "critical" : "positive"}
         />
       </div>
+
+      <SectionCard
+        title="Marketplace readiness recommendation"
+        description={
+          best
+            ? `${best.provider} is the strongest route for this deal — predicted incremental licence TCV of ${currency(best.netIncrementalTermValue, cur)} net of listing fees`
+            : "No provider currently clears the eligibility checks — this deal should transact direct"
+        }
+        actions={
+          best && (
+            <Button size="sm" disabled={!canEdit} onClick={() => applyRecommendation(best)}>
+              <Sparkles className="mr-1.5 h-4 w-4" /> Apply {best.provider} recommendation
+            </Button>
+          )
+        }
+      >
+        {!customer && (
+          <p className="mb-3 text-xs text-muted-foreground">
+            No customer profile linked to this deal — eligibility is inferred from the configured provider models only. Link a customer to use their committed cloud spend.
+          </p>
+        )}
+        <div className="grid gap-4 lg:grid-cols-3">
+          {recommendations.map((r) => (
+            <div key={r.provider} className="rounded-lg border bg-card p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-display text-sm font-semibold">{r.provider}</p>
+                  <p className="text-xs text-muted-foreground">{r.recommendedRoute}</p>
+                </div>
+                <Badge variant={eligibilityVariant[r.eligibility]}>{r.eligibility}</Badge>
+              </div>
+
+              <dl className="mt-3 space-y-1.5 text-xs">
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Committed spend</dt>
+                  <dd className="tabular-nums">{currency(r.commitment, cur)}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Recommended routing</dt>
+                  <dd className="tabular-nums">{percent(r.recommendedRoutePct, 0)} · {currency(r.routedTermValue, cur)}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Listing fee ({percent(r.recommendedFeePct, 1)})</dt>
+                  <dd className="tabular-nums">{currency(r.fee, cur)}</dd>
+                </div>
+                <div className="flex justify-between gap-2 font-medium">
+                  <dt>Predicted incremental TCV</dt>
+                  <dd className="tabular-nums">{currency(r.netIncrementalTermValue, cur)}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Incremental ACV</dt>
+                  <dd className="tabular-nums">{currency(r.incrementalAcv, cur)}</dd>
+                </div>
+              </dl>
+
+              <ul className="mt-3 space-y-1.5">
+                {r.checks.map((c) => {
+                  const Icon = checkIcon[c.status];
+                  return (
+                    <li key={c.label} className="flex items-start gap-2 text-xs">
+                      <Icon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${checkTone[c.status]}`} />
+                      <span>
+                        <span className="font-medium">{c.label}</span>
+                        <span className="block text-muted-foreground">{c.detail}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <p className="mt-3 text-xs text-muted-foreground">{r.rationale}</p>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-[10px]">Confidence {r.confidence}</Badge>
+                {r.isActive && <Badge variant="secondary" className="text-[10px]">Active model</Badge>}
+                {!r.supported && <Badge variant="outline" className="text-[10px]">Extensible route</Badge>}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto h-7 text-xs"
+                  disabled={!canEdit || r.recommendedRoutePct === 0 || r.eligibility === "Not eligible"}
+                  onClick={() => applyRecommendation(r)}
+                >
+                  Apply
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+
 
       <SectionCard
         title="Cloud Marketplace Optimizer"
