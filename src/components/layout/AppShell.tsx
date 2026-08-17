@@ -92,14 +92,18 @@ export default function AppShell() {
           </Sheet>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">OSP</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">TM</div>
             <div className="leading-tight">
-              <p className="font-display text-sm font-semibold">OSP Deal Builder</p>
-              <p className="text-xs text-muted-foreground">
-                {activeDeal ? `${activeDeal.customer_name} · ${activeDeal.partner_name} estate` : "Select a deal to begin"}
+              <p className="font-display text-sm font-semibold">Tech Mahindra Salesforce OSP Deal Builder</p>
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {activeDeal ? `${activeDeal.customer_name} · ${activeDeal.name}` : "Select a deal to begin"}
+                {activeDeal?.is_simulation && (
+                  <Badge variant="outline" className="text-[10px] font-normal">Simulation</Badge>
+                )}
               </p>
             </div>
           </div>
+
 
           <div className="ml-auto flex items-center gap-2">
             <Select value={activeDealId ?? undefined} onValueChange={setActiveDealId}>
