@@ -49,7 +49,7 @@ export default function KpiCard({ label, value, hint, icon: Icon, tone = "defaul
         <div className="mt-auto min-w-0">
           <p
             className={cn(
-              "font-display text-xl font-semibold leading-tight tabular-nums truncate sm:text-2xl",
+              "font-display text-xl font-semibold leading-tight tabular-nums whitespace-normal break-words sm:text-2xl",
               toneClass[tone],
             )}
             title={value}
