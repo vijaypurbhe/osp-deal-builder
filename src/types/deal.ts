@@ -74,6 +74,7 @@ export type DealRole = (typeof DEAL_ROLES)[number]["key"];
 export interface Deal {
   id: string;
   name: string;
+  customer_id: string | null;
   customer_name: string;
   partner_name: string;
   currency: string;
@@ -85,7 +86,27 @@ export interface Deal {
   notes: string | null;
   is_archived: boolean;
   sort_order: number;
+  opportunity_id: string | null;
+  deal_type: string;
+  stage: string;
+  region: string | null;
+  contract_years: number;
+  close_date: string | null;
+  salesforce_ae: string | null;
+  techm_account_lead: string | null;
+  techm_osp_lead: string | null;
+  finance_owner: string | null;
+  source_deal_id: string | null;
+  is_simulation: boolean;
+  current_scenario_id: string | null;
+  current_salesforce_acv: number;
+  renewal_uplift_pct: number;
+  min_license_gm_pct: number;
+  services_gm_target_pct: number;
+  use_customer_branding: boolean;
+  updated_at?: string;
 }
+
 
 export interface SkuLibraryItem {
   id: string;
@@ -100,6 +121,11 @@ export interface SkuLibraryItem {
   billing_frequency: string;
   default_tower_key: string | null;
   is_active: boolean;
+  edition: string | null;
+  metric: string | null;
+  billing_unit: string | null;
+  wholesale_unit_price: number;
+  default_commercial_layer: string;
 }
 
 export const DEAL_STATUSES = ["Active", "Shaping", "Submitted", "Won", "Lost", "On hold"] as const;
@@ -138,6 +164,12 @@ export interface SkuLine {
   product_category: string | null;
   cloud: string | null;
   classification: string;
+  commercial_layer: string;
+  edition: string | null;
+  metric: string | null;
+  growth_category: string | null;
+  acquisition_unit_price: number;
+  current_contract_unit_price: number;
   bom_type: string;
   quantity: number;
   unit_of_measure: string;
@@ -451,3 +483,245 @@ export const MODEL_DEFAULTS = {
 } as const;
 
 export type ModelKey = keyof typeof MODEL_DEFAULTS;
+
+/* =========================================================================
+   Platform-level (customer-agnostic) taxonomy
+   ========================================================================= */
+
+export const DEAL_TYPES = [
+  "Renewal",
+  "Renewal + Growth",
+  "Net New",
+  "Expansion",
+  "Competitive Displacement",
+  "Platform Consolidation",
+  "OSP Pre-Buy",
+  "Transformation Bundle",
+  "Marketplace Transaction",
+  "License Optimization",
+  "Mixed / Custom",
+] as const;
+export type DealType = (typeof DEAL_TYPES)[number];
+
+export const DEAL_STAGES = [
+  "Simulation",
+  "Qualification",
+  "Discovery",
+  "BOM Analysis",
+  "Commercial Design",
+  "Salesforce Negotiation",
+  "Customer Negotiation",
+  "Finance Approval",
+  "Contracting",
+  "Closed Won",
+  "Closed Lost",
+  "On Hold",
+] as const;
+export type DealStage = (typeof DEAL_STAGES)[number];
+
+export const OPEN_STAGES: string[] = DEAL_STAGES.filter((s) => !s.startsWith("Closed"));
+
+export const COMMERCIAL_LAYERS = [
+  { key: "A", label: "Layer A — Incumbent / protected estate" },
+  { key: "B", label: "Layer B — Known / committed growth" },
+  { key: "C", label: "Layer C — Future transformation growth" },
+] as const;
+export type CommercialLayer = "A" | "B" | "C";
+
+export const PRODUCT_FAMILIES = [
+  "Sales Cloud", "Service Cloud", "Agentforce", "Data 360", "Revenue Cloud", "Field Service",
+  "Industry Clouds", "MuleSoft", "Tableau", "Slack", "Marketing Cloud", "Experience Cloud",
+  "Platform", "Shield", "Sandboxes", "Success Plans", "Maps", "Other",
+] as const;
+
+export const INDUSTRIES = [
+  "Life Sciences & Healthcare", "Manufacturing", "Retail & Consumer", "Banking & Financial Services",
+  "Insurance", "Communications & Media", "Energy & Utilities", "Technology", "Public Sector",
+  "Travel & Transport", "Professional Services", "Other",
+] as const;
+
+export const REGIONS = ["Global", "North America", "LATAM", "UK & Ireland", "Europe", "Middle East & Africa", "APAC", "ANZ", "India"] as const;
+
+export const TIF_TEMPLATES = [
+  "No Fund", "Margin-Floor Fund", "Balanced Fund", "Strategic Growth Fund", "Competitive Displacement Fund", "Custom",
+] as const;
+
+export const VALUE_CATEGORIES = [
+  "Avoided renewal uplift", "License consolidation", "SKU rationalization", "Platform displacement",
+  "Innovation Fund", "AWS commitment optimization", "Managed-services savings", "Implementation efficiency",
+  "Productivity", "Revenue uplift", "Cost avoidance", "Vendor consolidation",
+] as const;
+
+export const MARKETPLACE_PROVIDERS = ["AWS", "Azure", "GCP"] as const;
+export const MARKETPLACE_ROUTES = [
+  "Direct (no marketplace)", "Marketplace private offer", "Marketplace private offer (CPPO)", "EDP / PPA drawdown", "MACC drawdown",
+] as const;
+export const MARKETPLACE_ELIGIBILITY = ["Pending", "Eligible", "Not eligible", "Not applicable"] as const;
+
+export const VALIDATION_SCOPES = [
+  { key: "universal", label: "Universal checks" },
+  { key: "salesforce", label: "Salesforce commercial checks" },
+  { key: "customer", label: "Customer-specific checks" },
+] as const;
+
+export const INCUMBENT_PRESETS = [
+  { vendor: "PROS", product: "PROS pricing & CPQ", replacement: "Revenue Cloud Advanced" },
+  { vendor: "ServiceMax", product: "ServiceMax field service", replacement: "Salesforce Field Service" },
+  { vendor: "Microsoft", product: "Dynamics 365", replacement: "Sales Cloud / Service Cloud" },
+  { vendor: "SAP", product: "SAP CRM", replacement: "Sales Cloud" },
+  { vendor: "Oracle", product: "Oracle CPQ", replacement: "Revenue Cloud Advanced" },
+  { vendor: "Adobe", product: "Adobe Marketing", replacement: "Marketing Cloud" },
+  { vendor: "Boomi", product: "Boomi integration", replacement: "MuleSoft" },
+  { vendor: "Qlik / Microsoft", product: "Qlik / Power BI", replacement: "Tableau" },
+  { vendor: "In-house", product: "Custom legacy system", replacement: "Salesforce Platform" },
+] as const;
+
+export interface Customer {
+  id: string;
+  name: string;
+  industry: string | null;
+  sub_industry: string | null;
+  region: string | null;
+  country: string | null;
+  currency: string;
+  employee_count: number | null;
+  annual_revenue: number | null;
+  salesforce_customer_since: string | null;
+  current_salesforce_acv: number;
+  aws_customer: boolean;
+  aws_commitment: number;
+  azure_commitment: number;
+  gcp_commitment: number;
+  strategic_platforms: string[];
+  incumbent_vendors: string[];
+  logo_url: string | null;
+  brand_primary: string | null;
+  brand_secondary: string | null;
+  notes: string | null;
+  is_simulation: boolean;
+}
+
+export interface ServicesConstruct {
+  id: string;
+  deal_id: string;
+  name: string;
+  scope: string | null;
+  annual_fee: number;
+  annual_cost: number;
+  years: number;
+  implementation_fee: number;
+  implementation_cost: number;
+  attach_target_pct: number;
+  notes: string | null;
+}
+
+export interface InnovationFund {
+  id: string;
+  deal_id: string;
+  name: string;
+  template: string;
+  total_fund: number;
+  salesforce_funded: number;
+  techm_funded: number;
+  customer_funded: number;
+  drawdown_y1: number;
+  drawdown_y2: number;
+  drawdown_y3: number;
+  consumed: number;
+  status: string;
+  notes: string | null;
+}
+
+export interface IncumbentPlatform {
+  id: string;
+  deal_id: string;
+  vendor: string;
+  product: string | null;
+  annual_license_spend: number;
+  annual_services_spend: number;
+  users: number;
+  renewal_date: string | null;
+  contract_end_date: string | null;
+  notes: string | null;
+  replacement_salesforce_product: string | null;
+  replacement_users: number;
+  replacement_annual_license_cost: number;
+  replacement_implementation_cost: number;
+  replacement_managed_services_cost: number;
+  status: string;
+}
+
+export interface MarketplaceModel {
+  id: string;
+  deal_id: string;
+  provider: string;
+  route: string;
+  is_enabled: boolean;
+  commitment_total: number;
+  commitment_remaining: number;
+  drawdown_pct: number;
+  marketplace_fee_pct: number;
+  cppo: boolean;
+  eligibility_status: string;
+  notes: string | null;
+}
+
+export interface ValidationItem {
+  id: string;
+  deal_id: string;
+  scope: string;
+  check_key: string | null;
+  title: string;
+  detail: string | null;
+  severity: string;
+  status: string;
+  owner: string | null;
+  resolution: string | null;
+}
+
+export interface ValueLever {
+  id: string;
+  deal_id: string;
+  category: string;
+  description: string | null;
+  annual_value: number;
+  term_value: number;
+  is_included: boolean;
+  confidence: string;
+}
+
+export interface DealVersion {
+  id: string;
+  deal_id: string;
+  version_no: number;
+  label: string;
+  summary: string | null;
+  snapshot: unknown;
+  author_id: string | null;
+  author_name: string | null;
+  created_at: string;
+}
+
+export interface DealTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  deal_type: string;
+  config: unknown;
+  source_deal_id: string | null;
+  is_seed: boolean;
+  sort_order: number;
+}
+
+export interface GlobalDefaults {
+  id: string;
+  is_active: boolean;
+  contract_years: number;
+  renewal_uplift_pct: number;
+  min_license_gm_pct: number;
+  services_gm_target_pct: number;
+  services_attach_pct: number;
+  currency: string;
+  approval_threshold_pct: number;
+  marketplace_fee_pct: number;
+}

@@ -55,59 +55,288 @@ export type Database = {
           },
         ]
       }
-      deals: {
+      customers: {
         Row: {
-          contract_end: string | null
-          contract_start: string | null
+          annual_revenue: number | null
+          aws_commitment: number
+          aws_customer: boolean
+          azure_commitment: number
+          brand_primary: string | null
+          brand_secondary: string | null
+          country: string | null
           created_at: string
           currency: string
-          customer_name: string
+          current_salesforce_acv: number
+          employee_count: number | null
+          gcp_commitment: number
           id: string
-          is_archived: boolean
+          incumbent_vendors: string[]
+          industry: string | null
+          is_simulation: boolean
+          logo_url: string | null
           name: string
           notes: string | null
-          owner_id: string | null
-          owner_name: string | null
-          partner_name: string
-          sort_order: number
-          status: string
+          region: string | null
+          salesforce_customer_since: string | null
+          strategic_platforms: string[]
+          sub_industry: string | null
           updated_at: string
         }
         Insert: {
-          contract_end?: string | null
-          contract_start?: string | null
+          annual_revenue?: number | null
+          aws_commitment?: number
+          aws_customer?: boolean
+          azure_commitment?: number
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          country?: string | null
           created_at?: string
           currency?: string
-          customer_name?: string
+          current_salesforce_acv?: number
+          employee_count?: number | null
+          gcp_commitment?: number
           id?: string
-          is_archived?: boolean
+          incumbent_vendors?: string[]
+          industry?: string | null
+          is_simulation?: boolean
+          logo_url?: string | null
           name: string
           notes?: string | null
-          owner_id?: string | null
-          owner_name?: string | null
-          partner_name?: string
-          sort_order?: number
-          status?: string
+          region?: string | null
+          salesforce_customer_since?: string | null
+          strategic_platforms?: string[]
+          sub_industry?: string | null
           updated_at?: string
         }
         Update: {
-          contract_end?: string | null
-          contract_start?: string | null
+          annual_revenue?: number | null
+          aws_commitment?: number
+          aws_customer?: boolean
+          azure_commitment?: number
+          brand_primary?: string | null
+          brand_secondary?: string | null
+          country?: string | null
           created_at?: string
           currency?: string
-          customer_name?: string
+          current_salesforce_acv?: number
+          employee_count?: number | null
+          gcp_commitment?: number
           id?: string
-          is_archived?: boolean
+          incumbent_vendors?: string[]
+          industry?: string | null
+          is_simulation?: boolean
+          logo_url?: string | null
           name?: string
           notes?: string | null
-          owner_id?: string | null
-          owner_name?: string | null
-          partner_name?: string
-          sort_order?: number
-          status?: string
+          region?: string | null
+          salesforce_customer_since?: string | null
+          strategic_platforms?: string[]
+          sub_industry?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      deal_templates: {
+        Row: {
+          config: Json
+          created_at: string
+          deal_type: string
+          description: string | null
+          id: string
+          is_seed: boolean
+          name: string
+          sort_order: number
+          source_deal_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          deal_type?: string
+          description?: string | null
+          id?: string
+          is_seed?: boolean
+          name: string
+          sort_order?: number
+          source_deal_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          deal_type?: string
+          description?: string | null
+          id?: string
+          is_seed?: boolean
+          name?: string
+          sort_order?: number
+          source_deal_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      deal_versions: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          label: string
+          snapshot: Json
+          summary: string | null
+          version_no: number
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          label: string
+          snapshot?: Json
+          summary?: string | null
+          version_no?: number
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          label?: string
+          snapshot?: Json
+          summary?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_versions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          close_date: string | null
+          contract_end: string | null
+          contract_start: string | null
+          contract_years: number
+          created_at: string
+          currency: string
+          current_salesforce_acv: number
+          current_scenario_id: string | null
+          customer_id: string | null
+          customer_name: string
+          deal_type: string
+          finance_owner: string | null
+          id: string
+          is_archived: boolean
+          is_simulation: boolean
+          min_license_gm_pct: number
+          name: string
+          notes: string | null
+          opportunity_id: string | null
+          owner_id: string | null
+          owner_name: string | null
+          partner_name: string
+          region: string | null
+          renewal_uplift_pct: number
+          salesforce_ae: string | null
+          services_gm_target_pct: number
+          sort_order: number
+          source_deal_id: string | null
+          stage: string
+          status: string
+          techm_account_lead: string | null
+          techm_osp_lead: string | null
+          updated_at: string
+          use_customer_branding: boolean
+        }
+        Insert: {
+          close_date?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          contract_years?: number
+          created_at?: string
+          currency?: string
+          current_salesforce_acv?: number
+          current_scenario_id?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          deal_type?: string
+          finance_owner?: string | null
+          id?: string
+          is_archived?: boolean
+          is_simulation?: boolean
+          min_license_gm_pct?: number
+          name: string
+          notes?: string | null
+          opportunity_id?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          partner_name?: string
+          region?: string | null
+          renewal_uplift_pct?: number
+          salesforce_ae?: string | null
+          services_gm_target_pct?: number
+          sort_order?: number
+          source_deal_id?: string | null
+          stage?: string
+          status?: string
+          techm_account_lead?: string | null
+          techm_osp_lead?: string | null
+          updated_at?: string
+          use_customer_branding?: boolean
+        }
+        Update: {
+          close_date?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          contract_years?: number
+          created_at?: string
+          currency?: string
+          current_salesforce_acv?: number
+          current_scenario_id?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          deal_type?: string
+          finance_owner?: string | null
+          id?: string
+          is_archived?: boolean
+          is_simulation?: boolean
+          min_license_gm_pct?: number
+          name?: string
+          notes?: string | null
+          opportunity_id?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          partner_name?: string
+          region?: string | null
+          renewal_uplift_pct?: number
+          salesforce_ae?: string | null
+          services_gm_target_pct?: number
+          sort_order?: number
+          source_deal_id?: string | null
+          stage?: string
+          status?: string
+          techm_account_lead?: string | null
+          techm_osp_lead?: string | null
+          updated_at?: string
+          use_customer_branding?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       discussion_items: {
         Row: {
@@ -168,6 +397,51 @@ export type Database = {
           },
         ]
       }
+      global_defaults: {
+        Row: {
+          approval_threshold_pct: number
+          contract_years: number
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          marketplace_fee_pct: number
+          min_license_gm_pct: number
+          renewal_uplift_pct: number
+          services_attach_pct: number
+          services_gm_target_pct: number
+          updated_at: string
+        }
+        Insert: {
+          approval_threshold_pct?: number
+          contract_years?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          marketplace_fee_pct?: number
+          min_license_gm_pct?: number
+          renewal_uplift_pct?: number
+          services_attach_pct?: number
+          services_gm_target_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          approval_threshold_pct?: number
+          contract_years?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          marketplace_fee_pct?: number
+          min_license_gm_pct?: number
+          renewal_uplift_pct?: number
+          services_attach_pct?: number
+          services_gm_target_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       import_batches: {
         Row: {
           created_at: string
@@ -218,6 +492,142 @@ export type Database = {
           },
         ]
       }
+      incumbent_platforms: {
+        Row: {
+          annual_license_spend: number
+          annual_services_spend: number
+          contract_end_date: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          notes: string | null
+          product: string | null
+          renewal_date: string | null
+          replacement_annual_license_cost: number
+          replacement_implementation_cost: number
+          replacement_managed_services_cost: number
+          replacement_salesforce_product: string | null
+          replacement_users: number
+          status: string
+          updated_at: string
+          users: number
+          vendor: string
+        }
+        Insert: {
+          annual_license_spend?: number
+          annual_services_spend?: number
+          contract_end_date?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          notes?: string | null
+          product?: string | null
+          renewal_date?: string | null
+          replacement_annual_license_cost?: number
+          replacement_implementation_cost?: number
+          replacement_managed_services_cost?: number
+          replacement_salesforce_product?: string | null
+          replacement_users?: number
+          status?: string
+          updated_at?: string
+          users?: number
+          vendor: string
+        }
+        Update: {
+          annual_license_spend?: number
+          annual_services_spend?: number
+          contract_end_date?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          notes?: string | null
+          product?: string | null
+          renewal_date?: string | null
+          replacement_annual_license_cost?: number
+          replacement_implementation_cost?: number
+          replacement_managed_services_cost?: number
+          replacement_salesforce_product?: string | null
+          replacement_users?: number
+          status?: string
+          updated_at?: string
+          users?: number
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incumbent_platforms_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      innovation_funds: {
+        Row: {
+          consumed: number
+          created_at: string
+          customer_funded: number
+          deal_id: string
+          drawdown_y1: number
+          drawdown_y2: number
+          drawdown_y3: number
+          id: string
+          name: string
+          notes: string | null
+          salesforce_funded: number
+          status: string
+          techm_funded: number
+          template: string
+          total_fund: number
+          updated_at: string
+        }
+        Insert: {
+          consumed?: number
+          created_at?: string
+          customer_funded?: number
+          deal_id: string
+          drawdown_y1?: number
+          drawdown_y2?: number
+          drawdown_y3?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          salesforce_funded?: number
+          status?: string
+          techm_funded?: number
+          template?: string
+          total_fund?: number
+          updated_at?: string
+        }
+        Update: {
+          consumed?: number
+          created_at?: string
+          customer_funded?: number
+          deal_id?: string
+          drawdown_y1?: number
+          drawdown_y2?: number
+          drawdown_y3?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          salesforce_funded?: number
+          status?: string
+          techm_funded?: number
+          template?: string
+          total_fund?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "innovation_funds_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_audit_log: {
         Row: {
           email: string
@@ -250,6 +660,65 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      marketplace_models: {
+        Row: {
+          commitment_remaining: number
+          commitment_total: number
+          cppo: boolean
+          created_at: string
+          deal_id: string
+          drawdown_pct: number
+          eligibility_status: string
+          id: string
+          is_enabled: boolean
+          marketplace_fee_pct: number
+          notes: string | null
+          provider: string
+          route: string
+          updated_at: string
+        }
+        Insert: {
+          commitment_remaining?: number
+          commitment_total?: number
+          cppo?: boolean
+          created_at?: string
+          deal_id: string
+          drawdown_pct?: number
+          eligibility_status?: string
+          id?: string
+          is_enabled?: boolean
+          marketplace_fee_pct?: number
+          notes?: string | null
+          provider?: string
+          route?: string
+          updated_at?: string
+        }
+        Update: {
+          commitment_remaining?: number
+          commitment_total?: number
+          cppo?: boolean
+          created_at?: string
+          deal_id?: string
+          drawdown_pct?: number
+          eligibility_status?: string
+          id?: string
+          is_enabled?: boolean
+          marketplace_fee_pct?: number
+          notes?: string | null
+          provider?: string
+          route?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_models_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_form_lines: {
         Row: {
@@ -568,15 +1037,75 @@ export type Database = {
           },
         ]
       }
+      services_constructs: {
+        Row: {
+          annual_cost: number
+          annual_fee: number
+          attach_target_pct: number
+          created_at: string
+          deal_id: string
+          id: string
+          implementation_cost: number
+          implementation_fee: number
+          name: string
+          notes: string | null
+          scope: string | null
+          updated_at: string
+          years: number
+        }
+        Insert: {
+          annual_cost?: number
+          annual_fee?: number
+          attach_target_pct?: number
+          created_at?: string
+          deal_id: string
+          id?: string
+          implementation_cost?: number
+          implementation_fee?: number
+          name?: string
+          notes?: string | null
+          scope?: string | null
+          updated_at?: string
+          years?: number
+        }
+        Update: {
+          annual_cost?: number
+          annual_fee?: number
+          attach_target_pct?: number
+          created_at?: string
+          deal_id?: string
+          id?: string
+          implementation_cost?: number
+          implementation_fee?: number
+          name?: string
+          notes?: string | null
+          scope?: string | null
+          updated_at?: string
+          years?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_constructs_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sku_library: {
         Row: {
           billing_frequency: string
+          billing_unit: string | null
           cloud: string | null
           created_at: string
+          default_commercial_layer: string
           default_tower_key: string | null
           description: string | null
+          edition: string | null
           id: string
           is_active: boolean
+          metric: string | null
           product_category: string | null
           product_family: string | null
           sku_code: string | null
@@ -584,15 +1113,20 @@ export type Database = {
           unit_list_price: number
           unit_of_measure: string
           updated_at: string
+          wholesale_unit_price: number
         }
         Insert: {
           billing_frequency?: string
+          billing_unit?: string | null
           cloud?: string | null
           created_at?: string
+          default_commercial_layer?: string
           default_tower_key?: string | null
           description?: string | null
+          edition?: string | null
           id?: string
           is_active?: boolean
+          metric?: string | null
           product_category?: string | null
           product_family?: string | null
           sku_code?: string | null
@@ -600,15 +1134,20 @@ export type Database = {
           unit_list_price?: number
           unit_of_measure?: string
           updated_at?: string
+          wholesale_unit_price?: number
         }
         Update: {
           billing_frequency?: string
+          billing_unit?: string | null
           cloud?: string | null
           created_at?: string
+          default_commercial_layer?: string
           default_tower_key?: string | null
           description?: string | null
+          edition?: string | null
           id?: string
           is_active?: boolean
+          metric?: string | null
           product_category?: string | null
           product_family?: string | null
           sku_code?: string | null
@@ -616,11 +1155,13 @@ export type Database = {
           unit_list_price?: number
           unit_of_measure?: string
           updated_at?: string
+          wholesale_unit_price?: number
         }
         Relationships: []
       }
       sku_lines: {
         Row: {
+          acquisition_unit_price: number
           approval_status: string
           approval_threshold_pct: number
           assumption_owner: string | null
@@ -630,15 +1171,20 @@ export type Database = {
           category_discount_pct: number
           classification: string
           cloud: string | null
+          commercial_layer: string
           coterm_date: string | null
           created_at: string
+          current_contract_unit_price: number
           description: string | null
           discount_reason: string | null
           discountable: boolean
+          edition: string | null
           end_date: string | null
+          growth_category: string | null
           id: string
           line_discount_pct: number
           max_discount_pct: number
+          metric: string | null
           needs_salesforce_confirmation: boolean
           needs_sn_confirmation: boolean
           notes: string | null
@@ -661,6 +1207,7 @@ export type Database = {
           year3_qty: number | null
         }
         Insert: {
+          acquisition_unit_price?: number
           approval_status?: string
           approval_threshold_pct?: number
           assumption_owner?: string | null
@@ -670,15 +1217,20 @@ export type Database = {
           category_discount_pct?: number
           classification?: string
           cloud?: string | null
+          commercial_layer?: string
           coterm_date?: string | null
           created_at?: string
+          current_contract_unit_price?: number
           description?: string | null
           discount_reason?: string | null
           discountable?: boolean
+          edition?: string | null
           end_date?: string | null
+          growth_category?: string | null
           id?: string
           line_discount_pct?: number
           max_discount_pct?: number
+          metric?: string | null
           needs_salesforce_confirmation?: boolean
           needs_sn_confirmation?: boolean
           notes?: string | null
@@ -701,6 +1253,7 @@ export type Database = {
           year3_qty?: number | null
         }
         Update: {
+          acquisition_unit_price?: number
           approval_status?: string
           approval_threshold_pct?: number
           assumption_owner?: string | null
@@ -710,15 +1263,20 @@ export type Database = {
           category_discount_pct?: number
           classification?: string
           cloud?: string | null
+          commercial_layer?: string
           coterm_date?: string | null
           created_at?: string
+          current_contract_unit_price?: number
           description?: string | null
           discount_reason?: string | null
           discountable?: boolean
+          edition?: string | null
           end_date?: string | null
+          growth_category?: string | null
           id?: string
           line_discount_pct?: number
           max_discount_pct?: number
+          metric?: string | null
           needs_salesforce_confirmation?: boolean
           needs_sn_confirmation?: boolean
           notes?: string | null
@@ -817,6 +1375,106 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      validation_items: {
+        Row: {
+          check_key: string | null
+          created_at: string
+          deal_id: string
+          detail: string | null
+          id: string
+          owner: string | null
+          resolution: string | null
+          scope: string
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          check_key?: string | null
+          created_at?: string
+          deal_id: string
+          detail?: string | null
+          id?: string
+          owner?: string | null
+          resolution?: string | null
+          scope?: string
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          check_key?: string | null
+          created_at?: string
+          deal_id?: string
+          detail?: string | null
+          id?: string
+          owner?: string | null
+          resolution?: string | null
+          scope?: string
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validation_items_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      value_levers: {
+        Row: {
+          annual_value: number
+          category: string
+          confidence: string
+          created_at: string
+          deal_id: string
+          description: string | null
+          id: string
+          is_included: boolean
+          term_value: number
+          updated_at: string
+        }
+        Insert: {
+          annual_value?: number
+          category: string
+          confidence?: string
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          id?: string
+          is_included?: boolean
+          term_value?: number
+          updated_at?: string
+        }
+        Update: {
+          annual_value?: number
+          category?: string
+          confidence?: string
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          id?: string
+          is_included?: boolean
+          term_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_levers_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
