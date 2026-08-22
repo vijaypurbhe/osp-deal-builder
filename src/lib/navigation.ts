@@ -79,6 +79,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Discussion log", to: "/discussion", icon: MessageSquareWarning, description: "Open questions with the customer and vendor" },
       { label: "Risk register", to: "/risks", icon: ShieldAlert, description: "Commercial and delivery exposure" },
       { label: "Settings", to: "/settings", icon: Settings, description: "Profile, roles and deal defaults" },
+      { label: "Admin console", to: "/admin", icon: ShieldCheck, description: "All deals, owners, collaborators and platform roles", adminOnly: true },
+
     ],
   },
 ];
