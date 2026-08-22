@@ -6,44 +6,44 @@
 
 @layer base {
   :root {
-    /* Smith+Nephew OSP Deal Builder — enterprise light theme */
+    /* Tech Mahindra Salesforce OSP Deal Builder — Salesforce blue enterprise light theme */
     --background: 0 0% 100%;
-    --foreground: 220 43% 11%;
+    --foreground: 212 94% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 43% 11%;
+    --card-foreground: 212 94% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 43% 11%;
+    --popover-foreground: 212 94% 14%;
 
-    /* Orange #FF6B00 */
-    --primary: 25 100% 50%;
+    /* Salesforce blue #0176D3 */
+    --primary: 205 98% 42%;
     --primary-foreground: 0 0% 100%;
 
-    /* Dark navy #101828 */
-    --brand-blue: 220 43% 11%;
+    /* Salesforce deep navy #032D60 */
+    --brand-blue: 212 94% 19%;
     --brand-blue-foreground: 0 0% 100%;
 
-    /* Teal #007C7A */
-    --teal: 179 100% 24%;
+    /* Salesforce cloud blue #1B96FF */
+    --teal: 209 100% 55%;
     --teal-foreground: 0 0% 100%;
 
-    /* Light teal #E8F7F6 */
-    --teal-soft: 176 48% 94%;
-    --teal-soft-foreground: 179 100% 20%;
+    /* Light blue #EAF5FE */
+    --teal-soft: 206 88% 96%;
+    --teal-soft-foreground: 212 94% 22%;
 
-    /* Light orange #FFF1E6 */
-    --tint-orange: 26 100% 95%;
-    --tint-orange-foreground: 22 90% 32%;
+    /* Tint blue #E5F3FF */
+    --tint-orange: 208 100% 95%;
+    --tint-orange-foreground: 212 94% 24%;
 
-    --secondary: 210 20% 97%;
-    --secondary-foreground: 220 43% 11%;
+    --secondary: 210 24% 97%;
+    --secondary-foreground: 212 94% 14%;
 
-    --muted: 210 20% 97%;
-    --muted-foreground: 221 13% 46%;
+    --muted: 210 24% 97%;
+    --muted-foreground: 212 14% 44%;
 
-    --accent: 26 100% 95%;
-    --accent-foreground: 22 90% 32%;
+    --accent: 208 100% 95%;
+    --accent-foreground: 212 94% 24%;
 
     --destructive: 356 68% 47%;
     --destructive-foreground: 0 0% 100%;
@@ -51,41 +51,42 @@
     --warning: 33 92% 45%;
     --warning-foreground: 0 0% 100%;
 
-    --success: 162 74% 27%;
+    --success: 152 66% 30%;
     --success-foreground: 0 0% 100%;
 
-    --info: 179 100% 24%;
+    --info: 205 98% 42%;
     --info-foreground: 0 0% 100%;
 
-    --border: 218 18% 90%;
-    --input: 218 18% 90%;
-    --ring: 25 100% 50%;
+    --border: 210 22% 90%;
+    --input: 210 22% 90%;
+    --ring: 205 98% 42%;
 
     --radius: 0.5rem;
 
-    --surface: 210 20% 98%;
-    --surface-foreground: 220 43% 11%;
+    --surface: 210 24% 98%;
+    --surface-foreground: 212 94% 14%;
 
-    --chart-1: 25 100% 50%;
-    --chart-2: 179 100% 24%;
-    --chart-3: 220 43% 25%;
-    --chart-4: 200 65% 45%;
-    --chart-5: 33 92% 55%;
-    --chart-6: 262 45% 52%;
+    --chart-1: 205 98% 42%;
+    --chart-2: 209 100% 55%;
+    --chart-3: 212 94% 22%;
+    --chart-4: 187 72% 38%;
+    --chart-5: 262 52% 55%;
+    --chart-6: 33 92% 50%;
 
-    --shadow-card: 0 1px 2px 0 hsl(220 43% 11% / 0.04), 0 1px 3px 0 hsl(220 43% 11% / 0.06);
-    --shadow-raised: 0 2px 6px -1px hsl(220 43% 11% / 0.08), 0 10px 24px -12px hsl(220 43% 11% / 0.18);
-    --shadow-panel: 0 24px 60px -28px hsl(220 43% 11% / 0.28);
+    --shadow-card: 0 1px 2px 0 hsl(212 94% 14% / 0.04), 0 1px 3px 0 hsl(212 94% 14% / 0.06);
+    --shadow-raised: 0 2px 6px -1px hsl(212 94% 14% / 0.08), 0 10px 24px -12px hsl(212 94% 14% / 0.18);
+    --shadow-panel: 0 24px 60px -28px hsl(212 94% 14% / 0.28);
 
-    --sidebar-background: 220 43% 11%;
-    --sidebar-foreground: 214 16% 72%;
-    --sidebar-primary: 25 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 38% 17%;
+    --sidebar-background: 212 94% 14%;
+    --sidebar-foreground: 208 30% 78%;
+    --sidebar-primary: 209 100% 55%;
+    --sidebar-primary-foreground: 212 94% 12%;
+    --sidebar-accent: 212 70% 21%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 32% 20%;
-    --sidebar-ring: 25 100% 50%;
+    --sidebar-border: 212 55% 24%;
+    --sidebar-ring: 209 100% 55%;
   }
+
 
   .dark {
     --background: 220 40% 8%;
