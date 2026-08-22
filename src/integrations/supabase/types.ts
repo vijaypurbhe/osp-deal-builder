@@ -1502,6 +1502,7 @@ export type Database = {
         | "tm_osp_lead"
         | "sn_reviewer"
         | "finance_reviewer"
+        | "osp_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1636,6 +1637,7 @@ export const Constants = {
         "tm_osp_lead",
         "sn_reviewer",
         "finance_reviewer",
+        "osp_admin",
       ],
     },
   },
