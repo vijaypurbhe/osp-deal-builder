@@ -137,9 +137,16 @@ export default function AppShell() {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" size="icon" aria-label="New deal" disabled={!canEdit} onClick={() => setNewDeal(true)}>
+            <Button variant="outline" size="icon" aria-label="New deal" disabled={!canCreateDeals} onClick={() => setNewDeal(true)}>
               <Plus className="h-4 w-4" />
             </Button>
+
+            {activeDeal && (activeDealAccess === "owner" || isAdmin) && !isSharedSandbox && (
+              <Button variant="outline" size="icon" aria-label="Share deal" onClick={() => setShare(true)}>
+                <Share2 className="h-4 w-4" />
+              </Button>
+            )}
+
 
             <Select value={activeScenarioId ?? undefined} onValueChange={setActiveScenarioId}>
               <SelectTrigger className="hidden w-[230px] md:flex" aria-label="Active scenario">
