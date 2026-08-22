@@ -1,8 +1,9 @@
 import {
   LayoutDashboard, Boxes, GitCompareArrows, SlidersHorizontal, Users, Database, Bot, Network, Wrench,
   Percent, FileSignature, Upload, MessageSquareWarning, ShieldAlert, Settings, Briefcase, Library,
-  Building2, LineChart, Handshake, Gauge, Coins, Sparkles, CloudCog, Swords, BadgeCheck,
+  Building2, LineChart, Handshake, Gauge, Coins, Sparkles, CloudCog, Swords, BadgeCheck, ShieldCheck,
 } from "lucide-react";
+
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
