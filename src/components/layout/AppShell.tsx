@@ -56,14 +56,21 @@ function SidebarContent({ onNavigate, isAdmin }: { onNavigate?: () => void; isAd
 
 
 export default function AppShell() {
-  const { profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId, canEdit } = useDeal();
+  const {
+    profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId,
+    canEdit, canCreateDeals, isAdmin, activeDealAccess, readOnlyReason,
+  } = useDeal();
   const { data: deals } = useDeals();
   const { data: scenarios } = useScenarios();
+  const duplicate = useDuplicateDeal();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [newDeal, setNewDeal] = useState(false);
+  const [share, setShare] = useState(false);
   const activeDeal = (deals ?? []).find((d) => d.id === activeDealId) ?? null;
+  const isSharedSandbox = !!activeDeal?.is_simulation && !activeDeal?.owner_id;
   const current = ALL_NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
+
 
   // Default to the first non-archived deal so pages are never blank.
   useEffect(() => {
