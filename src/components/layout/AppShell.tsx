@@ -184,7 +184,7 @@ export default function AppShell() {
 
       <div className="flex">
         <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:block">
-          <SidebarContent />
+          <SidebarContent isAdmin={isAdmin} />
         </aside>
         <main className="min-w-0 flex-1 px-4 py-6 lg:px-8">
           {current && (
