@@ -3,54 +3,57 @@ import { useEffect, useState } from "react";
 import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
 import { useDeal } from "@/context/DealContext";
 import { useDeals, useScenarios } from "@/hooks/useDealData";
+import { useDuplicateDeal } from "@/hooks/useDealMutations";
 import NewDealDialog from "@/components/deals/NewDealDialog";
+import ShareDealDialog from "@/components/deals/ShareDealDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { LogOut, Menu, Plus, UserRound } from "lucide-react";
+import { DEAL_ROLES } from "@/types/deal";
+import { Eye, FlaskConical, LogOut, Menu, Plus, Share2, UserRound } from "lucide-react";
 
-const ROLE_LABEL: Record<string, string> = {
-  deal_architect: "Deal architect",
-  salesforce_ae: "Salesforce AE",
-  tm_osp_lead: "Tech Mahindra OSP lead",
-  sn_reviewer: "Customer reviewer",
-  finance_reviewer: "Finance reviewer",
-};
+const ROLE_LABEL: Record<string, string> = Object.fromEntries(DEAL_ROLES.map((r) => [r.key, r.label]));
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: boolean }) {
   return (
     <nav className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-5">
-      {NAV_GROUPS.map((group) => (
-        <div key={group.label}>
-          <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group.label}</p>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.to === "/"}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                      isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground",
-                    )
-                  }
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      {NAV_GROUPS.map((group) => {
+        const items = group.items.filter((item) => !item.adminOnly || isAdmin);
+        if (!items.length) return null;
+        return (
+          <div key={group.label}>
+            <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group.label}</p>
+            <ul className="space-y-0.5">
+              {items.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === "/"}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground",
+                      )
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </nav>
   );
 }
+
 
 export default function AppShell() {
   const { profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId, canEdit } = useDeal();
