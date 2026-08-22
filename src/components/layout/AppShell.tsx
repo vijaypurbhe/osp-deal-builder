@@ -97,7 +97,7 @@ export default function AppShell() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
-              <SidebarContent onNavigate={() => setOpen(false)} />
+              <SidebarContent onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
             </SheetContent>
           </Sheet>
 
