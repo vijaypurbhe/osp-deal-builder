@@ -32,7 +32,7 @@ export default function ShareDealDialog({ dealId, dealName, open, onOpenChange, 
       return;
     }
     setErrors({});
-    invite.mutate(parsed.data, { onSuccess: () => setEmail("") });
+    invite.mutate({ email: parsed.data.email as string, role: parsed.data.role as "viewer" | "editor" }, { onSuccess: () => setEmail("") });
   };
 
   return (
