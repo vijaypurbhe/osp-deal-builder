@@ -110,7 +110,14 @@ export default function AppShell() {
                 {activeDeal?.is_simulation && (
                   <Badge variant="outline" className="text-[10px] font-normal">Simulation</Badge>
                 )}
+                {activeDeal && activeDealAccess === "owner" && !isSharedSandbox && (
+                  <Badge variant="secondary" className="text-[10px] font-normal">Owner</Badge>
+                )}
+                {activeDeal && activeDealAccess === "viewer" && (
+                  <Badge variant="outline" className="gap-1 text-[10px] font-normal"><Eye className="h-3 w-3" /> Viewer</Badge>
+                )}
               </p>
+
             </div>
           </div>
 
