@@ -37,6 +37,8 @@ import ImportPage from "@/pages/ImportPage";
 import DiscussionPage from "@/pages/DiscussionPage";
 import RiskPage from "@/pages/RiskPage";
 import SettingsPage from "@/pages/SettingsPage";
+import AdminPage from "@/pages/AdminPage";
+
 
 
 const queryClient = new QueryClient();
