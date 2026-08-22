@@ -11,7 +11,9 @@ export interface NavItem {
   to: string;
   icon: LucideIcon;
   description: string;
-}
+  /** Only rendered for OSP platform admins. */
+  adminOnly?: boolean;
+
 
 export interface NavGroup {
   label: string;
