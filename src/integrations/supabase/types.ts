@@ -65,6 +65,7 @@ export type Database = {
           brand_secondary: string | null
           country: string | null
           created_at: string
+          created_by: string | null
           currency: string
           current_salesforce_acv: number
           employee_count: number | null
@@ -91,6 +92,7 @@ export type Database = {
           brand_secondary?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           currency?: string
           current_salesforce_acv?: number
           employee_count?: number | null
@@ -117,6 +119,7 @@ export type Database = {
           brand_secondary?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           currency?: string
           current_salesforce_acv?: number
           employee_count?: number | null
@@ -135,6 +138,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      deal_members: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deal_id: string
+          id: string
+          invited_email: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deal_id: string
+          id?: string
+          invited_email: string
+          role?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string
+          id?: string
+          invited_email?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_members_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deal_templates: {
         Row: {
@@ -1482,7 +1523,13 @@ export type Database = {
     }
     Functions: {
       can_edit_deal: { Args: never; Returns: boolean }
+      can_own_deal: { Args: { _deal_id: string }; Returns: boolean }
+      can_read_deal: { Args: { _deal_id: string }; Returns: boolean }
+      can_read_scenario: { Args: { _scenario_id: string }; Returns: boolean }
+      can_write_deal: { Args: { _deal_id: string }; Returns: boolean }
+      can_write_scenario: { Args: { _scenario_id: string }; Returns: boolean }
       current_user_email: { Args: never; Returns: string }
+      deal_member_role: { Args: { _deal_id: string }; Returns: string }
       ensure_login_report_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
@@ -1492,6 +1539,7 @@ export type Database = {
         Returns: boolean
       }
       is_deal_architect: { Args: never; Returns: boolean }
+      is_osp_admin: { Args: never; Returns: boolean }
       is_techmahindra_user: { Args: never; Returns: boolean }
     }
     Enums: {
@@ -1502,6 +1550,7 @@ export type Database = {
         | "tm_osp_lead"
         | "sn_reviewer"
         | "finance_reviewer"
+        | "osp_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1636,6 +1685,7 @@ export const Constants = {
         "tm_osp_lead",
         "sn_reviewer",
         "finance_reviewer",
+        "osp_admin",
       ],
     },
   },

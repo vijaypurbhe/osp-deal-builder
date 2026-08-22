@@ -1,8 +1,9 @@
 import {
   LayoutDashboard, Boxes, GitCompareArrows, SlidersHorizontal, Users, Database, Bot, Network, Wrench,
   Percent, FileSignature, Upload, MessageSquareWarning, ShieldAlert, Settings, Briefcase, Library,
-  Building2, LineChart, Handshake, Gauge, Coins, Sparkles, CloudCog, Swords, BadgeCheck,
+  Building2, LineChart, Handshake, Gauge, Coins, Sparkles, CloudCog, Swords, BadgeCheck, ShieldCheck,
 } from "lucide-react";
+
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -10,7 +11,12 @@ export interface NavItem {
   to: string;
   icon: LucideIcon;
   description: string;
+  /** Only rendered for OSP platform admins. */
+  adminOnly?: boolean;
 }
+
+
+
 
 export interface NavGroup {
   label: string;
@@ -73,6 +79,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Discussion log", to: "/discussion", icon: MessageSquareWarning, description: "Open questions with the customer and vendor" },
       { label: "Risk register", to: "/risks", icon: ShieldAlert, description: "Commercial and delivery exposure" },
       { label: "Settings", to: "/settings", icon: Settings, description: "Profile, roles and deal defaults" },
+      { label: "Admin console", to: "/admin", icon: ShieldCheck, description: "All deals, owners, collaborators and platform roles", adminOnly: true },
+
     ],
   },
 ];

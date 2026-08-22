@@ -37,6 +37,8 @@ import ImportPage from "@/pages/ImportPage";
 import DiscussionPage from "@/pages/DiscussionPage";
 import RiskPage from "@/pages/RiskPage";
 import SettingsPage from "@/pages/SettingsPage";
+import AdminPage from "@/pages/AdminPage";
+
 
 
 const queryClient = new QueryClient();
@@ -85,6 +87,8 @@ const App = () => (
               <Route path="/discussion" element={<DiscussionPage />} />
               <Route path="/risks" element={<RiskPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

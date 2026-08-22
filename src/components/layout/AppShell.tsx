@@ -3,64 +3,74 @@ import { useEffect, useState } from "react";
 import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
 import { useDeal } from "@/context/DealContext";
 import { useDeals, useScenarios } from "@/hooks/useDealData";
+import { useDuplicateDeal } from "@/hooks/useDealMutations";
 import NewDealDialog from "@/components/deals/NewDealDialog";
+import ShareDealDialog from "@/components/deals/ShareDealDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { LogOut, Menu, Plus, UserRound } from "lucide-react";
+import { DEAL_ROLES } from "@/types/deal";
+import { Eye, FlaskConical, LogOut, Menu, Plus, Share2, UserRound } from "lucide-react";
 
-const ROLE_LABEL: Record<string, string> = {
-  deal_architect: "Deal architect",
-  salesforce_ae: "Salesforce AE",
-  tm_osp_lead: "Tech Mahindra OSP lead",
-  sn_reviewer: "Customer reviewer",
-  finance_reviewer: "Finance reviewer",
-};
+const ROLE_LABEL: Record<string, string> = Object.fromEntries(DEAL_ROLES.map((r) => [r.key, r.label]));
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: boolean }) {
   return (
     <nav className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-5">
-      {NAV_GROUPS.map((group) => (
-        <div key={group.label}>
-          <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group.label}</p>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.to === "/"}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                      isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground",
-                    )
-                  }
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      {NAV_GROUPS.map((group) => {
+        const items = group.items.filter((item) => !item.adminOnly || isAdmin);
+        if (!items.length) return null;
+        return (
+          <div key={group.label}>
+            <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{group.label}</p>
+            <ul className="space-y-0.5">
+              {items.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === "/"}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground/70 hover:bg-muted hover:text-foreground",
+                      )
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </nav>
   );
 }
 
+
 export default function AppShell() {
-  const { profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId, canEdit } = useDeal();
+  const {
+    profile, roles, signOut, activeScenarioId, setActiveScenarioId, activeDealId, setActiveDealId,
+    canEdit, canCreateDeals, isAdmin, activeDealAccess, readOnlyReason,
+  } = useDeal();
   const { data: deals } = useDeals();
   const { data: scenarios } = useScenarios();
+  const duplicate = useDuplicateDeal();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [newDeal, setNewDeal] = useState(false);
+  const [share, setShare] = useState(false);
   const activeDeal = (deals ?? []).find((d) => d.id === activeDealId) ?? null;
+  const isSharedSandbox = !!activeDeal?.is_simulation && !activeDeal?.owner_id;
   const current = ALL_NAV_ITEMS.find((i) => (i.to === "/" ? pathname === "/" : pathname.startsWith(i.to)));
+
 
   // Default to the first non-archived deal so pages are never blank.
   useEffect(() => {
@@ -87,7 +97,7 @@ export default function AppShell() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
-              <SidebarContent onNavigate={() => setOpen(false)} />
+              <SidebarContent onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
             </SheetContent>
           </Sheet>
 
@@ -100,7 +110,14 @@ export default function AppShell() {
                 {activeDeal?.is_simulation && (
                   <Badge variant="outline" className="text-[10px] font-normal">Simulation</Badge>
                 )}
+                {activeDeal && activeDealAccess === "owner" && !isSharedSandbox && (
+                  <Badge variant="secondary" className="text-[10px] font-normal">Owner</Badge>
+                )}
+                {activeDeal && activeDealAccess === "viewer" && (
+                  <Badge variant="outline" className="gap-1 text-[10px] font-normal"><Eye className="h-3 w-3" /> Viewer</Badge>
+                )}
               </p>
+
             </div>
           </div>
 
@@ -120,9 +137,16 @@ export default function AppShell() {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" size="icon" aria-label="New deal" disabled={!canEdit} onClick={() => setNewDeal(true)}>
+            <Button variant="outline" size="icon" aria-label="New deal" disabled={!canCreateDeals} onClick={() => setNewDeal(true)}>
               <Plus className="h-4 w-4" />
             </Button>
+
+            {activeDeal && (activeDealAccess === "owner" || isAdmin) && !isSharedSandbox && (
+              <Button variant="outline" size="icon" aria-label="Share deal" onClick={() => setShare(true)}>
+                <Share2 className="h-4 w-4" />
+              </Button>
+            )}
+
 
             <Select value={activeScenarioId ?? undefined} onValueChange={setActiveScenarioId}>
               <SelectTrigger className="hidden w-[230px] md:flex" aria-label="Active scenario">
@@ -171,10 +195,17 @@ export default function AppShell() {
       </header>
 
       <NewDealDialog open={newDeal} onOpenChange={setNewDeal} />
+      <ShareDealDialog
+        dealId={activeDeal?.id ?? null}
+        dealName={activeDeal?.name}
+        open={share}
+        onOpenChange={setShare}
+        canManage={activeDealAccess === "owner" || isAdmin}
+      />
 
       <div className="flex">
         <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:block">
-          <SidebarContent />
+          <SidebarContent isAdmin={isAdmin} />
         </aside>
         <main className="min-w-0 flex-1 px-4 py-6 lg:px-8">
           {current && (
@@ -183,8 +214,34 @@ export default function AppShell() {
               <p className="text-sm text-muted-foreground">{current.description}</p>
             </div>
           )}
+          {activeDeal && isSharedSandbox && (
+            <Alert className="mb-5">
+              <FlaskConical className="h-4 w-4" />
+              <AlertTitle>Shared simulation template</AlertTitle>
+              <AlertDescription className="flex flex-wrap items-center gap-3">
+                <span className="text-sm">
+                  This simulation is available to everyone and stays read-only. Copy it into your own private deal to model changes.
+                </span>
+                <Button
+                  size="sm"
+                  disabled={duplicate.isPending}
+                  onClick={() => duplicate.mutate(activeDeal, { onSuccess: (d) => setActiveDealId(d.id) })}
+                >
+                  {duplicate.isPending ? "Copying…" : "Copy to my deals"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          {activeDeal && !isSharedSandbox && readOnlyReason && (
+            <Alert className="mb-5">
+              <Eye className="h-4 w-4" />
+              <AlertTitle>Read-only</AlertTitle>
+              <AlertDescription className="text-sm">{readOnlyReason}</AlertDescription>
+            </Alert>
+          )}
           <Outlet />
         </main>
+
       </div>
     </div>
   );

@@ -62,12 +62,14 @@ export const ORDER_FORM_TYPES = [
 ] as const;
 
 export const DEAL_ROLES = [
-  { key: "deal_architect", label: "Deal Architect / Admin", canEdit: true },
+  { key: "osp_admin", label: "OSP Platform Admin", canEdit: true },
+  { key: "deal_architect", label: "Deal Architect", canEdit: true },
   { key: "salesforce_ae", label: "Salesforce AE / Commercial", canEdit: true },
   { key: "tm_osp_lead", label: "Tech Mahindra OSP Lead", canEdit: true },
-  { key: "sn_reviewer", label: "Smith+Nephew Reviewer", canEdit: false },
+  { key: "sn_reviewer", label: "Customer Reviewer", canEdit: false },
   { key: "finance_reviewer", label: "Finance / Deal Desk Reviewer", canEdit: false },
 ] as const;
+
 
 export type DealRole = (typeof DEAL_ROLES)[number]["key"];
 
