@@ -195,6 +195,13 @@ export default function AppShell() {
       </header>
 
       <NewDealDialog open={newDeal} onOpenChange={setNewDeal} />
+      <ShareDealDialog
+        dealId={activeDeal?.id ?? null}
+        dealName={activeDeal?.name}
+        open={share}
+        onOpenChange={setShare}
+        canManage={activeDealAccess === "owner" || isAdmin}
+      />
 
       <div className="flex">
         <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 border-r bg-card lg:block">
@@ -207,8 +214,34 @@ export default function AppShell() {
               <p className="text-sm text-muted-foreground">{current.description}</p>
             </div>
           )}
+          {activeDeal && isSharedSandbox && (
+            <Alert className="mb-5">
+              <FlaskConical className="h-4 w-4" />
+              <AlertTitle>Shared simulation template</AlertTitle>
+              <AlertDescription className="flex flex-wrap items-center gap-3">
+                <span className="text-sm">
+                  This simulation is available to everyone and stays read-only. Copy it into your own private deal to model changes.
+                </span>
+                <Button
+                  size="sm"
+                  disabled={duplicate.isPending}
+                  onClick={() => duplicate.mutate(activeDeal, { onSuccess: (d) => setActiveDealId(d.id) })}
+                >
+                  {duplicate.isPending ? "Copying…" : "Copy to my deals"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          {activeDeal && !isSharedSandbox && readOnlyReason && (
+            <Alert className="mb-5">
+              <Eye className="h-4 w-4" />
+              <AlertTitle>Read-only</AlertTitle>
+              <AlertDescription className="text-sm">{readOnlyReason}</AlertDescription>
+            </Alert>
+          )}
           <Outlet />
         </main>
+
       </div>
     </div>
   );
