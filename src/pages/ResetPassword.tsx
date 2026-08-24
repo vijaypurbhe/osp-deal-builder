@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import ospLogo from "@/assets/osp-logo.png.asset.json";
 
 type State = "checking" | "ready" | "needs_code";
 
@@ -83,7 +84,7 @@ export default function ResetPassword() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
+          <img src={ospLogo.url} alt="OSP Deal Workbench by Tech Mahindra" className="mx-auto h-12 w-auto" />
           <CardTitle className="font-display text-xl">
             {state === "needs_code" ? "Confirm your reset code" : "Set a new password"}
           </CardTitle>
