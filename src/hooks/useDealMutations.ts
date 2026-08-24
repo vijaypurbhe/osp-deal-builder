@@ -352,13 +352,16 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
     (risks.data ?? []).map((r) => ({ ...strip(r as never), deal_id: deal.id })),
   );
 
-  const sourceScenarios = (scenarios.data ?? []) as { id: string }[];
+  const sourceScenarios = (scenarios.data ?? []) as { id: string; is_locked?: boolean }[];
   const idMap = new Map<string, string>();
+  const lockIds: string[] = [];
   for (const src of sourceScenarios) {
     const { data, error } = await supabase
       .from("scenarios")
       .insert({
         ...strip(src as never),
+        // Insert unlocked so cloned lines can be written, then restore the lock below.
+        is_locked: false,
         deal_id: deal.id,
         currency: deal.currency,
         contract_start: deal.contract_start,
@@ -368,8 +371,13 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
       .select("id")
       .single();
     if (error) throw error;
-    idMap.set(src.id, (data as { id: string }).id);
+    const newId = (data as { id: string }).id;
+    idMap.set(src.id, newId);
+    if (src.is_locked) lockIds.push(newId);
   }
+  const restoreLocks = async () => {
+    if (lockIds.length) await supabase.from("scenarios").update({ is_locked: true }).in("id", lockIds);
+  };
 
   const sourceIds = sourceScenarios.map((s) => s.id);
   if (!sourceIds.length) return;
