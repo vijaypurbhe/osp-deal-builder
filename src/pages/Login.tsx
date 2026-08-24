@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RESET_EMAIL_KEY } from "@/pages/ResetPassword";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import ospLogo from "@/assets/osp-logo.png.asset.json";
 import { useDeal } from "@/context/DealContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,7 +74,7 @@ export default function Login() {
       <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-2 text-center">
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
+            <img src={ospLogo.url} alt="OSP Deal Workbench by Tech Mahindra" className="mx-auto h-12 w-auto" />
             <CardTitle className="font-display text-xl">Reset your password</CardTitle>
             <CardDescription>We'll email you a secure link to set a new password.</CardDescription>
           </CardHeader>
@@ -108,7 +109,7 @@ export default function Login() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-md bg-primary font-display font-bold text-primary-foreground">OSP</div>
+          <img src={ospLogo.url} alt="OSP Deal Workbench by Tech Mahindra" className="mx-auto h-12 w-auto" />
           <CardTitle className="font-display text-xl">OSP Deal Builder</CardTitle>
           <CardDescription>Salesforce OSP deal shaping — commercial modelling workspace</CardDescription>
         </CardHeader>

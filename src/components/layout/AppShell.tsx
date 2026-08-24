@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/lib/navigation";
+import ospLogo from "@/assets/osp-logo.png.asset.json";
 import { useDeal } from "@/context/DealContext";
 import { useDeals, useScenarios } from "@/hooks/useDealData";
 import { useDuplicateDeal } from "@/hooks/useDealMutations";
@@ -102,7 +103,7 @@ export default function AppShell() {
           </Sheet>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary font-display text-sm font-bold text-primary-foreground">TM</div>
+            <img src={ospLogo.url} alt="OSP Deal Workbench by Tech Mahindra" className="h-9 w-auto shrink-0" />
             <div className="leading-tight">
               <p className="font-display text-sm font-semibold">Tech Mahindra Salesforce OSP Deal Builder</p>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
