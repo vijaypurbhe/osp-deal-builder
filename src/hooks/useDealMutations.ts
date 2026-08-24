@@ -201,6 +201,7 @@ export function useCreateDeal() {
             currency: input.currency,
             current_salesforce_acv: input.current_salesforce_acv ?? 0,
             is_simulation: input.is_simulation ?? false,
+            created_by: (await supabase.auth.getUser()).data.user?.id ?? null,
           })
           .select("id")
           .maybeSingle();
@@ -299,6 +300,11 @@ export function useCreateDeal() {
             }
           }
           await insertRows("sku_lines", lines);
+        }
+
+        // Re-apply the baseline lock once its seed lines are in place.
+        if (lockIds.length) {
+          await supabase.from("scenarios").update({ is_locked: true }).in("id", lockIds);
         }
       }
 
