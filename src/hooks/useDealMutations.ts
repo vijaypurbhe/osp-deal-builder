@@ -382,6 +382,7 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
   const sourceIds = sourceScenarios.map((s) => s.id);
   if (!sourceIds.length) return;
 
+
   const [lines, tiers, models, forms] = await Promise.all([
     supabase.from("sku_lines").select("*").in("scenario_id", sourceIds),
     supabase.from("bulk_discount_tiers").select("*").in("scenario_id", sourceIds),
