@@ -29,7 +29,7 @@ const ANY = "__any";
 type SortKey = "customer" | "combined" | "gm" | "close" | "health";
 
 export default function WorkspacePage() {
-  const { canEdit, setActiveDealId } = useDeal();
+  const { canCreateDeals, setActiveDealId } = useDeal();
   const { data, isLoading } = usePortfolio();
   const navigate = useNavigate();
   const [dialog, setDialog] = useState<{ open: boolean; simulation: boolean }>({ open: false, simulation: false });
@@ -135,10 +135,10 @@ export default function WorkspacePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" disabled={!canEdit} onClick={() => setDialog({ open: true, simulation: true })}>
+            <Button variant="outline" size="sm" disabled={!canCreateDeals} onClick={() => setDialog({ open: true, simulation: true })}>
               <FlaskConical className="mr-1.5 h-4 w-4" /> New deal simulation
             </Button>
-            <Button size="sm" disabled={!canEdit} onClick={() => setDialog({ open: true, simulation: false })}>
+            <Button size="sm" disabled={!canCreateDeals} onClick={() => setDialog({ open: true, simulation: false })}>
               <Plus className="mr-1.5 h-4 w-4" /> Create new deal
             </Button>
           </div>
@@ -304,7 +304,7 @@ export default function WorkspacePage() {
             </div>
             <div className="flex gap-2">
               {(activeFilters > 0 || search) && <Button variant="outline" size="sm" onClick={resetFilters}>Clear filters</Button>}
-              <Button size="sm" disabled={!canEdit} onClick={() => setDialog({ open: true, simulation: false })}>
+              <Button size="sm" disabled={!canCreateDeals} onClick={() => setDialog({ open: true, simulation: false })}>
                 <Plus className="mr-1.5 h-4 w-4" /> Create new deal
               </Button>
             </div>

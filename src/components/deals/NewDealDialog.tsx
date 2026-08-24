@@ -51,7 +51,7 @@ interface Props {
 }
 
 export default function NewDealDialog({ open, onOpenChange, simulation = false }: Props) {
-  const { profile, setActiveDealId, canEdit } = useDeal();
+  const { profile, setActiveDealId, canCreateDeals } = useDeal();
   const { data: deals } = useDeals();
   const { data: customers } = useCustomers();
   const { data: templates } = useDealTemplates();
@@ -434,7 +434,7 @@ export default function NewDealDialog({ open, onOpenChange, simulation = false }
           {step < 3 ? (
             <Button onClick={() => setStep((s) => s + 1)} disabled={step === 1 && (!form.name.trim() || !form.customer_name.trim())}>Next</Button>
           ) : (
-            <Button onClick={submit} disabled={!canEdit || create.isPending}>
+            <Button onClick={submit} disabled={!canCreateDeals || create.isPending}>
               {create.isPending ? "Creating…" : simulation ? "Create simulation" : "Create deal"}
             </Button>
           )}
