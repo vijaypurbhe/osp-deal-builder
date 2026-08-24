@@ -233,13 +233,14 @@ export function useCreateDeal() {
           DEFAULT_TOWER_SEED.map((t) => ({ ...t, deal_id: deal.id })),
         );
 
-        // Scenarios
+        // Scenarios — created unlocked so seed BOM lines can be written, then locked below.
         const preset = input.scenarioPreset === "single" ? SINGLE_SCENARIO : DEFAULT_SCENARIOS;
         const { data: created, error: scenarioError } = await supabase
           .from("scenarios")
           .insert(
             preset.map((s) => ({
               ...s,
+              is_locked: false,
               deal_id: deal.id,
               currency: input.currency,
               contract_start: input.contract_start,
@@ -248,9 +249,12 @@ export function useCreateDeal() {
               status: "Draft",
             })) as never,
           )
-          .select("id");
+          .select("id, name");
         if (scenarioError) throw scenarioError;
-        const scenarioIds = (created ?? []).map((s: { id: string }) => s.id);
+        const createdScenarios = (created ?? []) as { id: string; name: string }[];
+        const scenarioIds = createdScenarios.map((s) => s.id);
+        const lockNames = new Set(preset.filter((s) => s.is_locked).map((s) => s.name));
+        const lockIds = createdScenarios.filter((s) => lockNames.has(s.name)).map((s) => s.id);
 
         // Starting BOM from the SKU library
         if (input.source === "library" && input.librarySelections?.length) {
