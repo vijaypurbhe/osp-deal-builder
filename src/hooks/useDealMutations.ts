@@ -433,6 +433,7 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
     "order_forms",
     remap(forms.data).map((f) => ({ ...f, customer_name: deal.customer_name, partner_name: deal.partner_name })),
   );
+  await restoreLocks();
 }
 
 /** Copies the commercial construct modules (services, fund, marketplace, displacement, value). */
