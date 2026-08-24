@@ -201,6 +201,7 @@ export function useCreateDeal() {
             currency: input.currency,
             current_salesforce_acv: input.current_salesforce_acv ?? 0,
             is_simulation: input.is_simulation ?? false,
+            created_by: (await supabase.auth.getUser()).data.user?.id ?? null,
           })
           .select("id")
           .maybeSingle();
@@ -233,13 +234,14 @@ export function useCreateDeal() {
           DEFAULT_TOWER_SEED.map((t) => ({ ...t, deal_id: deal.id })),
         );
 
-        // Scenarios
+        // Scenarios — created unlocked so seed BOM lines can be written, then locked below.
         const preset = input.scenarioPreset === "single" ? SINGLE_SCENARIO : DEFAULT_SCENARIOS;
         const { data: created, error: scenarioError } = await supabase
           .from("scenarios")
           .insert(
             preset.map((s) => ({
               ...s,
+              is_locked: false,
               deal_id: deal.id,
               currency: input.currency,
               contract_start: input.contract_start,
@@ -248,9 +250,12 @@ export function useCreateDeal() {
               status: "Draft",
             })) as never,
           )
-          .select("id");
+          .select("id, name");
         if (scenarioError) throw scenarioError;
-        const scenarioIds = (created ?? []).map((s: { id: string }) => s.id);
+        const createdScenarios = (created ?? []) as { id: string; name: string }[];
+        const scenarioIds = createdScenarios.map((s) => s.id);
+        const lockNames = new Set(preset.filter((s) => s.is_locked).map((s) => s.name));
+        const lockIds = createdScenarios.filter((s) => lockNames.has(s.name)).map((s) => s.id);
 
         // Starting BOM from the SKU library
         if (input.source === "library" && input.librarySelections?.length) {
@@ -295,6 +300,11 @@ export function useCreateDeal() {
             }
           }
           await insertRows("sku_lines", lines);
+        }
+
+        // Re-apply the baseline lock once its seed lines are in place.
+        if (lockIds.length) {
+          await supabase.from("scenarios").update({ is_locked: true }).in("id", lockIds);
         }
       }
 
@@ -342,13 +352,16 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
     (risks.data ?? []).map((r) => ({ ...strip(r as never), deal_id: deal.id })),
   );
 
-  const sourceScenarios = (scenarios.data ?? []) as { id: string }[];
+  const sourceScenarios = (scenarios.data ?? []) as { id: string; is_locked?: boolean }[];
   const idMap = new Map<string, string>();
+  const lockIds: string[] = [];
   for (const src of sourceScenarios) {
     const { data, error } = await supabase
       .from("scenarios")
       .insert({
         ...strip(src as never),
+        // Insert unlocked so cloned lines can be written, then restore the lock below.
+        is_locked: false,
         deal_id: deal.id,
         currency: deal.currency,
         contract_start: deal.contract_start,
@@ -358,11 +371,17 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
       .select("id")
       .single();
     if (error) throw error;
-    idMap.set(src.id, (data as { id: string }).id);
+    const newId = (data as { id: string }).id;
+    idMap.set(src.id, newId);
+    if (src.is_locked) lockIds.push(newId);
   }
+  const restoreLocks = async () => {
+    if (lockIds.length) await supabase.from("scenarios").update({ is_locked: true }).in("id", lockIds);
+  };
 
   const sourceIds = sourceScenarios.map((s) => s.id);
   if (!sourceIds.length) return;
+
 
   const [lines, tiers, models, forms] = await Promise.all([
     supabase.from("sku_lines").select("*").in("scenario_id", sourceIds),
@@ -414,6 +433,7 @@ async function cloneDealContents(sourceDealId: string, deal: Deal, options: Clon
     "order_forms",
     remap(forms.data).map((f) => ({ ...f, customer_name: deal.customer_name, partner_name: deal.partner_name })),
   );
+  await restoreLocks();
 }
 
 /** Copies the commercial construct modules (services, fund, marketplace, displacement, value). */

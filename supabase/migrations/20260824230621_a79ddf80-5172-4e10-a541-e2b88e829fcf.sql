@@ -1,0 +1,13 @@
+GRANT EXECUTE ON FUNCTION public.is_osp_admin() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_deal_architect() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_edit_deal() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_own_deal(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_read_deal(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_write_deal(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_read_scenario(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_write_scenario(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.deal_member_role(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.current_user_email() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_techmahindra_user() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.ensure_login_report_admin() TO authenticated, service_role;
