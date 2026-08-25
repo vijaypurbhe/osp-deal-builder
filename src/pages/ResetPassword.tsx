@@ -12,11 +12,42 @@ type State = "checking" | "ready" | "needs_code";
 
 export const RESET_EMAIL_KEY = "osp.resetEmail";
 
+/** Pull a recovery token out of anything the user pastes: a full verify URL,
+ *  an app URL with #access_token / ?token_hash / ?code, or a bare token. */
+function extractToken(raw: string): { tokenHash?: string; code?: string; accessToken?: string; refreshToken?: string; otp?: string } {
+  const value = raw.trim();
+  if (!value) return {};
+  const readParams = (search: string, hash: string) => {
+    const q = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+    const h = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+    const get = (k: string) => q.get(k) ?? h.get(k) ?? undefined;
+    return {
+      tokenHash: get("token_hash") ?? get("token") ?? undefined,
+      code: get("code"),
+      accessToken: get("access_token"),
+      refreshToken: get("refresh_token"),
+    };
+  };
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const url = new URL(value);
+      return readParams(url.search, url.hash);
+    } catch {
+      /* fall through */
+    }
+  }
+  if (value.includes("=") && (value.includes("&") || value.includes("?") || value.includes("#"))) {
+    return readParams(value, "");
+  }
+  if (/^\d{6,8}$/.test(value)) return { otp: value };
+  return { tokenHash: value };
+}
+
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [state, setState] = useState<State>("checking");
   const [email, setEmail] = useState(() => localStorage.getItem(RESET_EMAIL_KEY) ?? "");
-  const [code, setCode] = useState("");
+  const [pasted, setPasted] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,40 +58,77 @@ export default function ResetPassword() {
   }, []);
 
   useEffect(() => {
-    let settled = false;
+    let cancelled = false;
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" || session) {
-        settled = true;
-        setState("ready");
-      }
+      if (event === "PASSWORD_RECOVERY" || session) setState("ready");
     });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        settled = true;
-        setState("ready");
-        return;
+
+    (async () => {
+      const { tokenHash, code, accessToken, refreshToken } = extractToken(
+        window.location.href,
+      );
+
+      // 1. Existing / hash-delivered session
+      if (accessToken && refreshToken) {
+        const { error: e } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (!cancelled && !e) return setState("ready");
       }
-      // Give the recovery link exchange a moment, then fall back to code entry.
-      setTimeout(() => {
-        if (!settled) setState((s) => (s === "checking" ? "needs_code" : s));
-      }, 2000);
-    });
-    return () => sub.subscription.unsubscribe();
+      // 2. PKCE style link
+      if (code) {
+        const { error: e } = await supabase.auth.exchangeCodeForSession(code);
+        if (!cancelled && !e) return setState("ready");
+      }
+      // 3. token_hash style link
+      if (tokenHash) {
+        const { error: e } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+        if (!cancelled && !e) return setState("ready");
+      }
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (data.session) return setState("ready");
+      setState((s) => (s === "checking" ? "needs_code" : s));
+    })();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
-  const verifyCode = async (e: React.FormEvent) => {
+  const useLinkOrCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    const { tokenHash, code, accessToken, refreshToken, otp } = extractToken(pasted);
     setBusy(true);
-    const { error: otpError } = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "recovery" });
-    setBusy(false);
-    if (otpError) return setError(otpError.message);
-    setState("ready");
+    try {
+      if (accessToken && refreshToken) {
+        const { error: err } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (err) throw err;
+      } else if (code) {
+        const { error: err } = await supabase.auth.exchangeCodeForSession(code);
+        if (err) throw err;
+      } else if (otp) {
+        if (!email) throw new Error("Enter your work email so we can match the code.");
+        const { error: err } = await supabase.auth.verifyOtp({ email, token: otp, type: "recovery" });
+        if (err) throw err;
+      } else if (tokenHash) {
+        const { error: err } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+        if (err) throw err;
+      } else {
+        throw new Error("Paste the full reset link from the email.");
+      }
+      setState("ready");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That reset link could not be verified.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const resend = async () => {
     if (!email) return setError("Enter your work email first.");
     setBusy(true);
+    localStorage.setItem(RESET_EMAIL_KEY, email);
     await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
     setBusy(false);
     toast.success("A new reset email is on its way.");
@@ -86,11 +154,11 @@ export default function ResetPassword() {
         <CardHeader className="space-y-2 text-center">
           <img src={ospLogo.url} alt="OSP Deal Workbench by Tech Mahindra" className="mx-auto h-12 w-auto" />
           <CardTitle className="font-display text-xl">
-            {state === "needs_code" ? "Confirm your reset code" : "Set a new password"}
+            {state === "needs_code" ? "Confirm your reset link" : "Set a new password"}
           </CardTitle>
           <CardDescription>
             {state === "needs_code"
-              ? "Paste the 6-digit code from the reset email, or open the link from the same browser."
+              ? "Right-click “Reset password” in the email, copy the link address, and paste it below."
               : "Choose a new password for your OSP Deal Builder account."}
           </CardDescription>
         </CardHeader>
@@ -98,14 +166,23 @@ export default function ResetPassword() {
           {state === "checking" && <p className="text-center text-sm text-muted-foreground">Checking your reset link…</p>}
 
           {state === "needs_code" && (
-            <form className="space-y-3" onSubmit={verifyCode}>
+            <form className="space-y-3" onSubmit={useLinkOrCode}>
               <div className="space-y-1.5">
                 <Label htmlFor="reset-email">Work email</Label>
-                <Input id="reset-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input id="reset-email" type="email" value={email} onChange={(ev) => setEmail(ev.target.value)} required />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="reset-code">Reset code</Label>
-                <Input id="reset-code" inputMode="numeric" autoComplete="one-time-code" placeholder="123456" value={code} onChange={(e) => setCode(e.target.value)} required />
+                <Label htmlFor="reset-link">Reset link (or code)</Label>
+                <Input
+                  id="reset-link"
+                  placeholder="https://…/auth/v1/verify?token=…&type=recovery"
+                  value={pasted}
+                  onChange={(ev) => setPasted(ev.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Paste the whole link — we read the recovery token from it, so it doesn't matter where the link tries to send you.
+                </p>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={busy}>Continue</Button>
@@ -120,11 +197,11 @@ export default function ResetPassword() {
             <form className="space-y-3" onSubmit={submit}>
               <div className="space-y-1.5">
                 <Label htmlFor="new-password">New password</Label>
-                <Input id="new-password" type="password" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input id="new-password" type="password" autoComplete="new-password" minLength={8} value={password} onChange={(ev) => setPassword(ev.target.value)} required />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm-password">Confirm new password</Label>
-                <Input id="confirm-password" type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+                <Input id="confirm-password" type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={(ev) => setConfirm(ev.target.value)} required />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={busy}>Update password</Button>
