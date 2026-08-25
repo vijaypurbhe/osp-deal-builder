@@ -302,10 +302,15 @@ export function useCreateDeal() {
           await insertRows("sku_lines", lines);
         }
 
-        // Re-apply the baseline lock once its seed lines are in place.
-        if (lockIds.length) {
+        // Re-apply the baseline lock only when a starting BOM was seeded. An empty
+        // baseline stays open so the user can add lines manually and confirm it later.
+        const seededBom =
+          (input.source === "library" && !!input.librarySelections?.length) ||
+          (input.source === "import" && !!input.importLines?.length);
+        if (seededBom && lockIds.length) {
           await supabase.from("scenarios").update({ is_locked: true }).in("id", lockIds);
         }
+
       }
 
       return deal;
