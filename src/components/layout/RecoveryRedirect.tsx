@@ -19,7 +19,9 @@ export default function RecoveryRedirect() {
     const isRecovery =
       hashParams.get("type") === "recovery" ||
       queryParams.get("type") === "recovery" ||
-      (hashParams.has("access_token") && hashParams.get("type") === "recovery");
+      hashParams.has("token_hash") ||
+      queryParams.has("token_hash");
+
 
     if (isRecovery) {
       navigate(`/reset-password${window.location.search}${window.location.hash}`, { replace: true });
