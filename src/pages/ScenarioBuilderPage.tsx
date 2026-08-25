@@ -70,13 +70,49 @@ export default function ScenarioBuilderPage() {
   return (
     <div className="space-y-6">
       {locked && (
-        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
           <Lock className="h-4 w-4" />
           {scenario.is_locked
             ? `${scenario.name} is locked — it is the reference baseline and is read-only.`
             : "You do not have edit rights for this scenario."}
+          {scenario.is_locked && canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto"
+              onClick={() =>
+                upsertScenario.mutate(
+                  { ...scenario, is_locked: false },
+                  { onSuccess: () => toast.success("Baseline reopened for editing") },
+                )
+              }
+            >
+              Reopen baseline to edit
+            </Button>
+          )}
         </div>
       )}
+      {!scenario.is_locked && scenario.is_baseline && canEdit && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            Baseline is open for editing — add SKU lines manually or upload a BOM workbook, then confirm to lock it as the reference.
+          </span>
+          <Button
+            size="sm"
+            className="ml-auto"
+            disabled={!(lines ?? []).length}
+            onClick={() =>
+              upsertScenario.mutate(
+                { ...scenario, is_locked: true },
+                { onSuccess: () => toast.success("Current BOM confirmed — baseline locked") },
+              )
+            }
+          >
+            Confirm current BOM
+          </Button>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="List ARR (annual)" value={currency(totals.listArr)} hint={`3-yr list ${currency(totals.listTermValue)}`} />
         <KpiCard label="Net ARR (annual)" value={currency(totals.netArr)} hint={`3-yr net ${currency(totals.netTermValue)}`} tone="positive" />
