@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RESET_EMAIL_KEY } from "@/pages/ResetPassword";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import ospLogo from "@/assets/osp-logo.png";
 import { useDeal } from "@/context/DealContext";
 import { Button } from "@/components/ui/button";
@@ -62,12 +61,6 @@ export default function Login() {
   };
 
 
-  const google = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) return toast.error("Google sign-in failed");
-    if (result.redirected) return;
-    navigate("/", { replace: true });
-  };
 
   if (mode === "forgot") {
     return (
@@ -154,11 +147,6 @@ export default function Login() {
             </TabsContent>
           </Tabs>
 
-          <div className="relative py-1 text-center text-xs text-muted-foreground">
-            <span className="bg-card px-2">or</span>
-            <div className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border" />
-          </div>
-          <Button variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
         </CardContent>
       </Card>
     </main>
